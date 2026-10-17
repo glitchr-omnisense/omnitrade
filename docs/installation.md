@@ -1,7 +1,7 @@
 # Installation and first calls
 
 ```sh
-composer require glitchr/omnitrade omnitrade/paypal            # one provider
+composer require omniscient/omnitrade omnitrade/paypal            # one provider
 composer require omnitrade/stripe omnitrade/shopify omnitrade/woocommerce omnitrade/web omnitrade/amazon
 ```
 
@@ -76,7 +76,7 @@ paypal 5O190127TN364715T pending
 send the buyer to https://www.sandbox.paypal.com/checkoutnow?token=5O190127TN364715T
 ```
 
-(run on 2026-10-05 in an empty directory, after `composer require glitchr/omnitrade omnitrade/paypal`;
+(run on 2026-10-05 in an empty directory, after `composer require omniscient/omnitrade omnitrade/paypal`;
 every provider asks for an account's keys, so the script answers in PayPal's place, with the order
 id of PayPal's own documentation. With `HttpClient::create()` and a sandbox application's client id
 and secret, the same lines create a real sandbox order.)

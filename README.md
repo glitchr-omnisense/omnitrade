@@ -1,6 +1,11 @@
-# glitchr/omnitrade
+# omniscient/omnitrade
 
 One contract for payment providers and commerce platforms - the Omnibus of trade.
+
+Published as `omniscient/omnitrade` (formerly `glitchr/omnitrade`, which this package replaces: a
+`composer.json` that still requires the old name keeps resolving to this package and never installs
+both). `omniscient/` is the vendor of every family's core, the providers keep `omnitrade/`, the
+namespace `Omnitrade\` and the GitHub repositories do not change.
 
 ```php
 $gateway = $registry->get('card');
@@ -51,7 +56,7 @@ What every provider answers with is kept whole in `$raw`: normalization loses no
 ## Plain PHP
 
 ```sh
-composer require glitchr/omnitrade omnitrade/paypal
+composer require omniscient/omnitrade omnitrade/paypal
 ```
 
 ```php
@@ -131,7 +136,7 @@ docker compose run --rm omnitrade test                               # every pac
 
 ## Responsibility
 
-`glitchr/omnitrade` and its `omnitrade/*` providers are independent, unofficial clients: none is
+`omniscient/omnitrade` and its `omnitrade/*` providers are independent, unofficial clients: none is
 affiliated with, endorsed by or sponsored by the services it reaches. Each service keeps its own
 terms (merchant or partner agreements, keys, rate limits, mentions such as the affiliate one), named
 with a link in the "Responsibility" section of the README of each provider that reaches one. The MIT

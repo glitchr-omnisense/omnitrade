@@ -1,4 +1,4 @@
-# glitchr/omnitrade with every provider package, your test keys in .env:
+# omniscient/omnitrade with every provider package, your test keys in .env:
 #
 #   cp .env.dist .env                                        # fill in the keys at hand
 #   docker compose run --rm omnitrade gateways               # which providers are installed and configured
@@ -17,7 +17,7 @@ name: omnitrade-harness
 services:
   omnitrade:
     build: .
-    image: glitchr/omnitrade-harness
+    image: omniscient/omnitrade-harness
     env_file:
       - path: .env
         required: false

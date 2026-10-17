@@ -1,5 +1,5 @@
 {
-    "name": "glitchr/omnitrade",
+    "name": "omniscient/omnitrade",
     "type": "library",
     "description": "Omnitrade: one contract for payment providers and commerce platforms - purchase, authorize, capture, refund, webhooks, platform orders - and its Symfony bundle (Omnibus's sibling for trade).",
     "keywords": [
@@ -28,6 +28,9 @@
         "symfony/dependency-injection": "^6.4|^7.0|^8.0",
         "symfony/http-client": "^6.4|^7.0|^8.0",
         "symfony/http-kernel": "^6.4|^7.0|^8.0"
+    },
+    "replace": {
+        "glitchr/omnitrade": "self.version"
     },
     "suggest": {
         "omnitrade/stripe": "Stripe: cards and wallets through Checkout, refunds, webhooks",
