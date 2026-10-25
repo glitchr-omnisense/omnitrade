@@ -3,14 +3,14 @@ title: Installation
 order: 10
 ---
 
-## Installation
+# Installation
 
 ```sh
 composer require omniscient/omnitrade omnitrade/paypal            # one provider
 composer require omnitrade/stripe omnitrade/shopify omnitrade/woocommerce omnitrade/web omnitrade/amazon
 ```
 
-### Requirements
+## Requirements
 
 - PHP 8.2 or later.
 - `omniscient/omnitrade` requires `symfony/http-client-contracts` (^3.0) and nothing else.
@@ -33,7 +33,7 @@ and in Symfony, where a bundle does the wiring ([Symfony](symfony.md)).
 library with no framework either; Omnipay's own requirements come with it, `symfony/http-foundation`
 among them - used as a library for its request object: no kernel, no container.
 
-### Plain PHP
+## Plain PHP
 
 ```php
 <?php // bare.php
@@ -120,7 +120,7 @@ No class of a framework is loaded on the way - a test of this package checks it 
 its own (`Tests/BareTest.php`), and so does `docker compose run --rm omnitrade bare`
 ([harness](harness.md)).
 
-### After the buyer is back
+## After the buyer is back
 
 ```php
 $paid = $gateway->capture($transaction->reference, idempotencyKey: 'attempt-1');   // PayPal: the money is taken now
@@ -133,7 +133,7 @@ $gateway->refund($transaction->reference, Money::of(500, 'EUR'), idempotencyKey:
 What each provider does on the way back differs (Stripe takes the money on its page, PayPal on
 `capture()`, Shopify and WooCommerce bring nobody back): [payments](usage-payments.md).
 
-### A webhook
+## A webhook
 
 ```php
 use Omnitrade\Exception\InvalidNotificationException;
@@ -148,7 +148,7 @@ try {
 
 More in [webhooks](usage-webhooks.md).
 
-### A product page, no key
+## A product page, no key
 
 ```php
 use Omnitrade\Web\WebGatewayFactory;
@@ -164,7 +164,7 @@ $web->affiliateLink('https://www.amazon.fr/dp/B0C1234567');                    /
 The catalogue of a platform (Shopify, WooCommerce, Stripe), page by page: [catalogue](catalogue.md).
 Connected accounts: [connect](connect.md). Subscriptions: [subscriptions](subscriptions.md).
 
-### In a framework
+## In a framework
 
 - **Symfony**: `Omnitrade\Bridge\Symfony\OmnitradeBundle` registers the factories on the
   application's `http_client`, builds the registry from `config/packages/omnitrade.yaml` and makes

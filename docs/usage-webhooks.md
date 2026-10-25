@@ -3,7 +3,7 @@ title: Webhooks
 order: 32
 ---
 
-## Webhooks
+# Webhooks
 
 `notify(string $body, array $headers = [])` reads what a provider sends to the shop's webhook
 endpoint: it checks the signature first, then reads the event as one `Notification`. Hand it the
@@ -44,7 +44,7 @@ whichever comes first (the return page's `fetch()` or the webhook), and keep the
 `purchase()` answered (for Shopify, the draft order). The [payments](usage-payments.md#a-complete-payment-from-the-order-to-the-refund)
 example signs and reads a Stripe event, offline.
 
-### What each provider checks
+## What each provider checks
 
 | Provider | Signature | Without the secret |
 |---|---|---|
@@ -58,7 +58,7 @@ A signature that holds on a body that is not JSON (or not the provider's event) 
 with a timestamp; Shopify and WooCommerce resend a delivery with the same id
 (`X-Shopify-Webhook-Id`, `X-WC-Webhook-Delivery-ID`), kept in `Notification::$id`.
 
-### The events each provider reads
+## The events each provider reads
 
 | Provider | Event | `status` | Also |
 |---|---|---|---|

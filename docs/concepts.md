@@ -3,9 +3,9 @@ title: Concepts
 order: 20
 ---
 
-## Concepts
+# Concepts
 
-### Gateway
+## Gateway
 
 `Omnitrade\GatewayInterface` is one provider, configured - a payment service (Stripe, PayPal) or a
 commerce platform (Shopify, WooCommerce). Every gateway answers the same methods; each typed
@@ -58,7 +58,7 @@ anything is sent; when the action returns without setting a result it throws a
 `ProviderException` (`... left the request unanswered.`). `supports()` probes the actions with an
 instance of the request class built without its constructor, so it costs no call.
 
-### Factory and Config
+## Factory and Config
 
 `Omnitrade\GatewayFactoryInterface` builds a provider's gateway from options:
 
@@ -100,7 +100,7 @@ the options replaces the provider's own action. `Config::defaults($defaults)` se
 set yet, `Config::get($key, $default = null)` reads one, `Config::validateNotEmpty($keys)` is
 step 2 (its message names the gateway: `The "paypal" gateway needs: secret.`).
 
-### Registry
+## Registry
 
 `Omnitrade\Registry` holds the shop's gateways by name:
 
@@ -128,7 +128,7 @@ An unknown name is an `InvalidConfigException` naming the configured ones
 (`No "card" gateway; configured: paypal, shop.`), a factory not given to the registry one naming
 the installed ones (`No "stripe" factory for the "other" gateway; installed: paypal, shopify.`).
 
-### Requests and actions
+## Requests and actions
 
 A request (`Omnitrade\Request\Request`) is a question put to a gateway: `setResult($result)` answers
 it, `getResult()` reads the answer, `isAnswered()` says whether an action set one (a `null` result
@@ -170,7 +170,7 @@ the API is an instance of the class named in `$this->apiClass` (else an
 `InvalidConfigException`, `... needs a <class>, got <class>.`). How to write one:
 [Writing a provider](providers.md).
 
-### Money
+## Money
 
 `Omnitrade\Model\Money` is an amount in a currency's **minor units**: `Money::of(1250, 'EUR')` is
 12,50 EUR. Every amount of every model is a `Money`.
@@ -195,7 +195,7 @@ Money::fromDecimal(0.1 + 0.2, 'EUR')->amount;  // 30
 
 (run on 2026-10-25 in the harness image)
 
-### Payment, Customer, Line
+## Payment, Customer, Line
 
 `Omnitrade\Model\Payment` is what to charge, and everything a provider may want with it. The amount
 is the truth; the lines are for the buyer's eyes (a hosted page), and a provider that cannot take
@@ -236,7 +236,7 @@ them, Stripe's `cus_...`), `phone`, `street` (`list<string>`), `postalCode`, `ci
 id), `physical` (bool, `false`: goods to post, as opposed to a service or a download).
 `total(): Money` is `unitAmount` times `quantity`.
 
-### Transaction and Status
+## Transaction and Status
 
 `Omnitrade\Model\Transaction` is a payment as the provider knows it.
 
@@ -275,20 +275,20 @@ id), `physical` (bool, `false`: goods to post, as opposed to a service or a down
 have gone back)". `isFinal()` is true for PARTIALLY_REFUNDED although a further refund can still
 follow: a status of the payment, not of its refunds.
 
-### Refund
+## Refund
 
 `Omnitrade\Model\Refund`: `provider`, `reference` (the provider's refund id, Stripe's `re_...`),
 `amount` (`Money`), `status` (`Status`: REFUNDED once done, PENDING while on its way, REFUSED when
 the provider failed it), `transactionReference` (the transaction refunded), `message`, `raw`.
 
-### PaymentMethod
+## PaymentMethod
 
 `Omnitrade\Model\PaymentMethod`: `code` (as the provider names it: `card`, `paypal`, `sepa_debit`,
 `klarna`), `label`, `kind` (one of the constants), `currencies` (`list<string>`, empty for any),
 `raw`. Kinds: `PaymentMethod::CARD` (`card`), `WALLET` (`wallet`), `BANK` (`bank`),
 `BUY_NOW_PAY_LATER` (`bnpl`), `OTHER` (`other`, the default).
 
-### Notification
+## Notification
 
 `Omnitrade\Model\Notification` is what a provider is telling the shop, checked: one event about one
 transaction, product, account or subscription.
@@ -310,14 +310,14 @@ transaction, product, account or subscription.
 `isAccount()` and `isSubscription()` test `account` and `subscription`; `isCatalogue()` is true
 when there is a product or stocks, or when the event's name starts with `product` or `inventory`.
 
-### PlatformOrder
+## PlatformOrder
 
 `Omnitrade\Model\PlatformOrder` is a commerce platform's order (Shopify, WooCommerce): `provider`,
 `reference` (the platform's id), `number` (the number people see, `#1042`), `status` (`Status`),
 `total` (`Money`), `customer` (`?Customer`), `lines` (`list<Line>`), `financialStatus` and
 `fulfillmentStatus` (the platform's own words), `createdAt`, `raw`.
 
-### The catalogue
+## The catalogue
 
 All `final readonly`, under `Omnitrade\Model` (a summary also in [catalogue](catalogue.md)):
 
@@ -380,7 +380,7 @@ Reference::of('  https://cave.example/products/margaux-2019?variant=7 ');
 Reference::of('gid://shopify/Product/42');   // id 'gid://shopify/Product/42', isUrl() false
 ```
 
-### Connected accounts and subscriptions
+## Connected accounts and subscriptions
 
 `Account` - somebody else's account at the provider, opened through the platform: `provider`,
 `reference` (`acct_...`), `type` (`Account::EXPRESS` `express`, `STANDARD` `standard`, `CUSTOM`
@@ -397,7 +397,7 @@ is opened for), `amount`, `interval` (`day`, `week`, `month`, `year`), `interval
 provider's price or product), `metadata`, `raw`. `isActive()` (active or trialing),
 `isCancelled()`. [Subscriptions](subscriptions.md).
 
-### Invariants
+## Invariants
 
 - Money in minor units, currencies ISO 4217 upper-case, countries ISO 3166-1 alpha-2.
 - Every model a gateway returns carries the gateway's name as `provider` and a non-empty

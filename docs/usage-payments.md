@@ -3,14 +3,14 @@ title: Payments
 order: 31
 ---
 
-## Payments
+# Payments
 
 Every provider here takes the money on a page of its own: the gateway answers `purchase()` with a
 `Transaction` PENDING and the page's address (`redirectUrl`), the application sends the buyer
 there, and the provider says later - on the return page, through `fetch()`, or by webhook - what
 became of it. None takes a card number on the server.
 
-### A complete payment, from the order to the refund
+## A complete payment, from the order to the refund
 
 The script runs as it is (`composer require omnitrade/stripe`): it answers in Stripe's place, with
 answers shaped as Stripe's API gives them. With `HttpClient::create()` in place of the
@@ -112,7 +112,7 @@ calls. Stripe's Checkout takes the money on its page, so there is no `capture()`
 > the postage as a line, and a discount in the lines' prices, as above, or give no lines (the
 > amount is then one line). The other providers send both.
 
-### Purchase
+## Purchase
 
 ```php
 $transaction = $gateway->purchase(new Payment(Money::of(2750, 'EUR'), 'ORDER-1042', returnUrl: 'https://shop.example/paid'));
@@ -134,7 +134,7 @@ The lines are listed when `Payment::linesAddUp()` (with the warning above for St
 amount is one line named by the description, else the reference. Which other fields each provider
 sends: [configuration](configuration.md#what-each-provider-reads-of-a-payment).
 
-### Authorize, capture, void
+## Authorize, capture, void
 
 Only PayPal answers `authorize()` (`supports(Authorize::class)` is false elsewhere).
 
@@ -160,7 +160,7 @@ the answer is the order read again (CANCELLED once PayPal voided it).
 > `void()` throws `The order holds no authorization to void.` Letting go of an approved order that
 > was never captured is done in PayPal's dashboard, or by leaving it to expire.
 
-### Refund
+## Refund
 
 ```php
 $refund = $gateway->refund($reference);                                   // all of it (not at Stripe: see below)
@@ -181,7 +181,7 @@ $refund->status;   // REFUNDED, or PENDING while the provider processes it
 > parameter is required`) before any call - not a `ProviderException`. Pass the transaction's
 > amount to refund all of it.
 
-### Fetch
+## Fetch
 
 `fetch($reference)` reads the transaction as the provider has it now: the return page and a
 webhook that did not arrive both rely on it.
@@ -193,7 +193,7 @@ webhook that did not arrive both rely on it.
 | Shopify | the draft order and the order it became | completed and paid: PAID (refunded: REFUNDED, PARTIALLY_REFUNDED; voided: CANCELLED); deleted: CANCELLED; else PENDING with the invoice URL |
 | WooCommerce | the order | `processing`, `completed`: PAID (REFUNDED or PARTIALLY_REFUNDED by its refunds); `refunded`: REFUNDED; `cancelled`: CANCELLED; `failed`: REFUSED; else (`pending`, `on-hold`, `checkout-draft`) PENDING with its `payment_url` |
 
-### Payment methods
+## Payment methods
 
 `paymentMethods(?Money $for, ?string $country)` lists what the provider can take. No provider reads
 `$for` or `$country` yet: the list is the same whatever the amount.
@@ -204,7 +204,7 @@ webhook that did not arrive both rely on it.
 | PayPal | always `paypal` (wallet), `card` (guest checkout), `paylater` (buy now, pay later) |
 | WooCommerce | the shop's payment gateways enabled (`GET /payment_gateways`), their kind guessed from their id (`stripe`/`card`: card, `paypal`/`apple`/`google`: wallet, `bacs`/`sepa`/`bank`: bank, `klarna`/`afterpay`: buy now pay later) |
 
-### Idempotency
+## Idempotency
 
 `Payment::$idempotencyKey`, and the `$idempotencyKey` argument of `capture()` and `refund()`, make
 the same operation asked twice happen once, where the provider honours it. Give one per attempt

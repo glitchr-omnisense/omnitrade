@@ -3,9 +3,9 @@ title: Configuration reference
 order: 40
 ---
 
-## Configuration reference
+# Configuration reference
 
-### The registry
+## The registry
 
 `new Registry(iterable $factories, array $config)`: the factories installed, and the gateways by
 name. Each gateway is a factory's name and its options:
@@ -31,7 +31,7 @@ is an `InvalidConfigException` naming every missing one. An option no code reads
 `Config` and ignored. Every key of the `Config` can be given as an option, the reserved ones
 included: `omnitrade.action.<name>` replaces a provider's action ([Concepts](concepts.md#factory-and-config)).
 
-### omnitrade/stripe
+## omnitrade/stripe
 
 | Option | Type | Default | Required | |
 |---|---|---|---|---|
@@ -44,7 +44,7 @@ included: `omnitrade.action.<name>` replaces a provider's action ([Concepts](con
 Plain REST calls (catalogue, Connect, subscriptions) have a 30-second timeout; omnipay's calls
 (Checkout, refunds) use the HTTP client's.
 
-### omnitrade/paypal
+## omnitrade/paypal
 
 | Option | Type | Default | Required | |
 |---|---|---|---|---|
@@ -54,7 +54,7 @@ Plain REST calls (catalogue, Connect, subscriptions) have a 30-second timeout; o
 | `webhook_id` | ?string | `null` | for `notify()` | the webhook's id in the developer dashboard, sent to PayPal's verification |
 | `timeout` | int | `15` | no | seconds, for every call |
 
-### omnitrade/shopify
+## omnitrade/shopify
 
 | Option | Type | Default | Required | |
 |---|---|---|---|---|
@@ -68,7 +68,7 @@ Plain REST calls (catalogue, Connect, subscriptions) have a 30-second timeout; o
 | `currency` | ?string | `null` | no | the currency the catalogue's prices are read in; `null`: the shop's (`shop { currencyCode }`). A label: nothing is converted |
 | `retry_delay` | float | `1` | no | seconds before retrying a 429 or a 5xx, doubled at each attempt (3 attempts); a 429's `Retry-After` prevails, capped at 60 |
 
-### omnitrade/woocommerce
+## omnitrade/woocommerce
 
 | Option | Type | Default | Required | |
 |---|---|---|---|---|
@@ -81,7 +81,7 @@ Plain REST calls (catalogue, Connect, subscriptions) have a 30-second timeout; o
 | `weight_unit` | string | `kg` | no | the store's weight unit: `kg`, `g`, `lbs`, `oz`; weights are given in grams |
 | `product_status` | string | `any` | no | what `fetchProducts()` lists: `any` (drafts, pending and private ones too), or `publish` |
 
-### omnitrade/web
+## omnitrade/web
 
 | Option | Type | Default | Required | |
 |---|---|---|---|---|
@@ -92,7 +92,7 @@ Plain REST calls (catalogue, Connect, subscriptions) have a 30-second timeout; o
 | `currency` | string | `EUR` | no | of a price found without one |
 | `affiliate` | map host => map of query parameters | `[]` | no | for `affiliateLink()`: `{ 'amazon.fr': { tag: 'mysite-21' } }`; a host matches itself and its subdomains |
 
-### omnitrade/amazon
+## omnitrade/amazon
 
 | Option | Type | Default | Required | |
 |---|---|---|---|---|
@@ -107,7 +107,7 @@ Plain REST calls (catalogue, Connect, subscriptions) have a 30-second timeout; o
 
 No option is required: a gateway with only `partner_tag` writes affiliate links.
 
-### What each provider reads of a payment
+## What each provider reads of a payment
 
 `Payment` carries more than any one provider sends. What each `purchase()` sends (`authorize()` the
 same at PayPal), from the code:

@@ -3,7 +3,7 @@ title: Errors
 order: 50
 ---
 
-## Errors
+# Errors
 
 Every exception Omnitrade throws implements `Omnitrade\Exception\OmnitradeException` (an interface
 extending `\Throwable`):
@@ -35,7 +35,7 @@ try {
 }
 ```
 
-### ProviderException
+## ProviderException
 
 ```php
 new ProviderException(string $provider, string $message, ?string $providerCode = null, ?\Throwable $previous = null)
@@ -68,7 +68,7 @@ is Shopify's `ProviderException`, with the errors Shopify gave in `$errors`.
 `Gateway::execute()` also throws a `ProviderException` when an action returns without answering
 (`<action class> left the request unanswered.`): a provider package's bug.
 
-### Real messages
+## Real messages
 
 From a script run on 2026-10-25 in the harness image, on a registry with a PayPal gateway, one
 missing its secret, a Shopify gateway, one naming a factory not installed, and PayPal answering
@@ -91,7 +91,7 @@ new Payment(fee, no destination)
   InvalidArgumentException: An application fee is kept on a payment sent to a destination account.
 ```
 
-### Not found
+## Not found
 
 `fetchProduct()` of a product the provider does not have answers `null`, not an exception (Stripe's
 `resource_missing`, WooCommerce's `invalid_id`, Shopify's empty `product`, an Amazon `getItems`
@@ -100,7 +100,7 @@ with no item, a page with no product markup). `fetchOrder()` of an unknown Shopi
 CANCELLED transaction. Elsewhere an unknown reference is the provider's 404, a
 `ProviderException`.
 
-### The models' own checks
+## The models' own checks
 
 Models and requests check their arguments with PHP's `\InvalidArgumentException`, which is not an
 `OmnitradeException`: it is thrown by the constructor, before any gateway is involved.
@@ -111,7 +111,7 @@ Models and requests check their arguments with PHP's `\InvalidArgumentException`
 | `Reference` (and `FetchProduct`, `AffiliateLink`, which build one) | neither an id nor a URL |
 | `Subscribe` | an interval other than `day`, `week`, `month`, `year`; an interval count under 1 |
 
-### An exception that escapes the rule
+## An exception that escapes the rule
 
 One case is known where a provider lets another library's exception through: `omnitrade/stripe`'s
 `refund()` without an amount throws `Omnipay\Common\Exception\InvalidRequestException` (`The amount

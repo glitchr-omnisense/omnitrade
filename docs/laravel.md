@@ -3,7 +3,7 @@ title: Laravel
 order: 16
 ---
 
-## Laravel
+# Laravel
 
 omnibridge/laravel, the bridge that hosts omnibase in Laravel, has no Omnitrade provider (it wires
 omniauth, omnimap and omnishield among others, not Omnitrade). None is needed: the registry is

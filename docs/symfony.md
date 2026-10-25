@@ -3,14 +3,14 @@ title: Symfony
 order: 15
 ---
 
-## Symfony
+# Symfony
 
 Omnitrade runs without a framework ([installation](installation.md)); in a Symfony application its
 bundle does the wiring. Its components - `symfony/config`, `symfony/dependency-injection`,
 `symfony/http-kernel` (6.4, 7 or 8) - are not required by `omniscient/omnitrade`: the application
 has them, and nothing of them is loaded outside Symfony.
 
-### Registering the bundle
+## Registering the bundle
 
 There is no Flex recipe: register `Omnitrade\Bridge\Symfony\OmnitradeBundle` by hand.
 
@@ -22,7 +22,7 @@ return [
 ];
 ```
 
-### Configuration
+## Configuration
 
 ```yaml
 # config/packages/omnitrade.yaml
@@ -64,7 +64,7 @@ The options are not validated when the container compiles - the tree accepts any
 when the gateway is built: a required option missing or empty is an `InvalidConfigException`
 naming it, the first time the gateway is asked for.
 
-### Services
+## Services
 
 Every `omnitrade/*` provider package installed has its factory registered as a service, on the
 application's `http_client` service (`nullOnInvalid()`: with no HTTP client service, the factory
@@ -99,7 +99,7 @@ for, and an option left empty only shows then (`InvalidConfigException`). Keys t
 office rather than set in the environment: `$registry->create('card', ['api_key' => $stored])`, a
 gateway built afresh with those options over the configured ones and not kept by the registry.
 
-### An application's own provider
+## An application's own provider
 
 A class of the application that implements `Omnitrade\GatewayFactoryInterface` (usually by
 extending `Omnitrade\GatewayFactory`, [Writing a provider](providers.md)) is autoconfigured: tagged
@@ -116,7 +116,7 @@ omnitrade:
 `Tests/Bridge/OmnitradeBundleTest.php` checks it: two gateways of an application's own factory,
 built from the configuration and injected by their names.
 
-### A webhook controller
+## A webhook controller
 
 ```php
 use Omnitrade\Exception\InvalidNotificationException;

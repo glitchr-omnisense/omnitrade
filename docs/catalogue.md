@@ -3,7 +3,7 @@ title: Catalogue
 order: 33
 ---
 
-## The catalogue: products, variants, offers, stock
+# The catalogue: products, variants, offers, stock
 
 The same gateways that take payments read a platform's catalogue: a shop kept
 in Shopify, WooCommerce or Stripe's own Products is read through one contract,
@@ -26,7 +26,7 @@ $product = $gateway->fetchProduct('https://cave.example/products/margaux-2019');
 $stocks = $gateway->fetchInventory(['gid://shopify/ProductVariant/7']);
 ```
 
-### A complete example
+## A complete example
 
 A catalogue copied page by page, then two affiliate links. The script runs as it is (`composer
 require omnitrade/woocommerce omnitrade/web omnitrade/amazon`): it answers in the shop's place,
@@ -114,7 +114,7 @@ affiliate link makes a call: `omnitrade/web` adds the parameters configured for 
 `utm_source` and `ref`, and gives `null` for a host it has no rule for; `omnitrade/amazon` keeps the
 Amazon store of the address (`www.amazon.de`) and writes `/dp/<ASIN>?tag=<partner tag>`.
 
-### Models
+## Models
 
 All `final readonly`, under `Omnitrade\Model`:
 
@@ -134,7 +134,7 @@ All `final readonly`, under `Omnitrade\Model`:
 `Product::price()` the lowest of its variants'. What the platform answered is
 kept in `$raw`.
 
-### Requests
+## Requests
 
 | Request | Result | Shortcut |
 |---|---|---|
@@ -167,7 +167,7 @@ page-reading section of omnitrade/web.
 `limit` is capped by each provider: 100 at Stripe and WooCommerce, 250 at Shopify, 10 at Amazon
 (at least 1 everywhere). Amazon ignores `cursor` and `updatedSince` and gives no next page.
 
-### Webhooks
+## Webhooks
 
 A product or stock event goes through `notify()` like a payment's: the
 `Notification` then carries `$product` (null for a deletion; `$reference` is
@@ -180,7 +180,7 @@ if ($notification->isCatalogue()) {
 }
 ```
 
-### Affiliate links
+## Affiliate links
 
 `affiliateLink()` gives the address that sends a buyer to a product with the
 site's tag, or null when the provider has no partner programme for it:

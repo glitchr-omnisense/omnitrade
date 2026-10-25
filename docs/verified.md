@@ -3,9 +3,9 @@ title: Verified, and not
 order: 90
 ---
 
-## Verified, and not
+# Verified, and not
 
-### What the tests prove
+## What the tests prove
 
 145 tests, green on 2026-10-25 in the workspace (the core and the six providers as path
 repositories, PHP 8.4.26, PHPUnit 11.5.57, run in the harness image with no network: 1244
@@ -32,7 +32,7 @@ PHP 8.4) on the workspace's checkouts, with `MockHttpClient` answers: [installat
 [writing a provider](providers.md), the capability tables of the [index](index.md#providers), the
 [Symfony](symfony.md) configuration tree and services, the error messages of [Errors](errors.md).
 
-### Not verified
+## Not verified
 
 - No call was made to a live service or a sandbox: no recorded answer here was captured from a
   real account. The [harness](harness.md) is where test keys exercise them; no run with keys is
@@ -45,7 +45,7 @@ PHP 8.4) on the workspace's checkouts, with `MockHttpClient` answers: [installat
 - The [Laravel](laravel.md) service provider was written from the registry's API, not run in a
   Laravel application.
 
-### Known defects
+## Known defects
 
 What the code does today, where it differs from what one would expect from the contract:
 

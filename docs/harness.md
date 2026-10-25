@@ -3,7 +3,7 @@ title: The Docker harness
 order: 70
 ---
 
-## The Docker harness
+# The Docker harness
 
 `docker/` runs this package with every `omnitrade/*` provider installed - from GitHub (branch
 1.x), or from the checkouts beside this one when `OMNITRADE_PLUGINS=../..` is set in `docker/.env`
@@ -45,7 +45,7 @@ docker compose run --rm omnitrade notify stripe -H 'Stripe-Signature: t=...,v1=.
 docker compose run --rm omnitrade catalogue shopify --since='-1 day' --limit=20
 ```
 
-### Bare: no bundle, no container
+## Bare: no bundle, no container
 
 The console above is a `symfony/console` application over a registry built by hand; `bare` is
 less still - one PHP script, `docker/harness/bin/bare`, that requires the autoloader and nothing
@@ -93,7 +93,7 @@ with no kernel and no container.
 The image is `php:8.4-cli-alpine` with Composer and `bcmath`; the harness's packages live in the
 `harness` volume of the `omnitrade-harness` project.
 
-### Configuration: docker/.env
+## Configuration: docker/.env
 
 `docker/.env` (git-ignored; copy `.env.dist`) holds the test keys. A gateway is configured once
 every key it needs is set; the others are listed by `gateways` as "needs ...".
@@ -112,7 +112,7 @@ buyer back), `HARNESS_CUSTOMER_EMAIL`, `HARNESS_CUSTOMER_NAME` (the payment's cu
 `HARNESS_PRODUCT_URL` (the page `bare` reads), `OMNITRADE_PLUGINS` (`../..`: the providers from the
 checkouts beside the core).
 
-### How it is put together
+## How it is put together
 
 `docker/compose.yml` (project `omnitrade-harness`) has one service, `omnitrade`, image
 `omniscient/omnitrade-harness`, which mounts the core at `/omnitrade/core`, the providers'

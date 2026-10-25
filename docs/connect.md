@@ -3,7 +3,7 @@ title: Connected accounts
 order: 34
 ---
 
-## Connected accounts: money for someone else
+# Connected accounts: money for someone else
 
 A platform that takes payments **for others** - the host of a gift fund, a
 seller of a marketplace - never keeps that money: the provider opens an
@@ -34,7 +34,7 @@ $stripe->purchase(new Payment(
 ));
 ```
 
-### Models and requests
+## Models and requests
 
 | Request | Result | Shortcut |
 |---|---|---|
@@ -52,7 +52,7 @@ its amount; refused without a destination). A provider without connected
 accounts ignores neither: it does not support `CreateAccount`, so nothing
 can name a destination there.
 
-### Webhooks
+## Webhooks
 
 `notify()` hands an account's event back with `Notification::$account` (the
 account as it stands) and `isAccount()` true; `$reference` is the account's
@@ -65,7 +65,7 @@ the dashboard).
 | `omnitrade/stripe` | `POST /v1/accounts` (Express) | `POST /v1/account_links` | `GET /v1/accounts/{id}` | `payment_intent_data[transfer_data][destination]`, `[application_fee_amount]` on the Checkout session |
 | others | not supported | | | |
 
-### What the shortcuts leave out
+## What the shortcuts leave out
 
 `createAccount()` sends no business type, the default capabilities (`['transfers']`) and no
 idempotency key; `accountLink()` asks for the onboarding page. The requests take the rest:

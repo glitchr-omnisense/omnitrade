@@ -3,7 +3,7 @@ title: Writing a provider
 order: 80
 ---
 
-## Writing a provider
+# Writing a provider
 
 A provider is a package of its own (`omnitrade/<service>`, namespace `Omnitrade\<Service>\`) that
 requires `omniscient/omnitrade` and `symfony/http-client`. It holds:
@@ -20,7 +20,7 @@ What it does not do, it has no action for: `supports()` then says no and the gat
 `RequestNotSupportedException`. An action that depends on an option (Amazon's reads, which need
 credentials) is left out by its closure returning `null`.
 
-### Errors: the family's rule
+## Errors: the family's rule
 
 | What happens | What the provider throws |
 |---|---|
@@ -48,7 +48,7 @@ Pagination: `fetchProducts()` answers a `ProductPage` whose `next` is the cursor
 Money is in minor units (`Money::of(1250, 'EUR')` is 12,50 EUR): a service speaking decimals is
 read with `Money::fromDecimal()` and written with `Money::decimal()`.
 
-### Conformance suite
+## Conformance suite
 
 `Omnitrade\Testing\GatewayContractTests` is the family's contract as PHPUnit tests, offline. Every
 provider's `Tests/<Service>ContractTest.php` uses it:
@@ -122,7 +122,7 @@ Every hook, and what each of the twelve tests checks: [Testing](testing.md#the-c
 Run it with the provider's other tests: in the workspace (`~/Sites/omnitrade`, path repositories
 and one `phpunit.xml.dist`), or through the Docker harness (`docker compose run --rm omnitrade test`).
 
-### A complete provider
+## A complete provider
 
 A payment service of one's own - here "Acme Pay", a hosted page at `api.acme-pay.example` with a
 bearer key - in one file for the reading (a package would put each class in its own file under
@@ -334,7 +334,7 @@ What the example follows:
   with `Money::decimal()`;
 - what the service answered is kept in `raw`.
 
-### The package
+## The package
 
 A provider package (`omnitrade/<service>` on GitHub as `glitchr-studio/omnitrade-<service>`, or any
 name for a provider of one's own) requires `omniscient/omnitrade` and `symfony/http-client`, and

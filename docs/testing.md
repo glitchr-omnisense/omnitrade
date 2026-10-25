@@ -3,7 +3,7 @@ title: Testing
 order: 60
 ---
 
-## Testing
+# Testing
 
 Code that uses Omnitrade depends on `GatewayInterface` (or on the `Registry`), never on a
 provider's classes: a test hands it a gateway that answers what the test needs. Two ways, both
@@ -16,7 +16,7 @@ offline:
   `MockHttpClient`, which answers each request as the service would. The provider's own mapping
   runs, so the test also proves the application reads what that provider gives.
 
-### An application's test
+## An application's test
 
 `CheckoutTest.php` tests a `Checkout` service of the application both ways:
 
@@ -145,7 +145,7 @@ provider calls are in its manual.
 - `Registry::create($name, $overrides)` builds a gateway with other options for one test (a
   sandbox flag, a webhook secret) without touching the configured one.
 
-### The conformance suite
+## The conformance suite
 
 `Omnitrade\Testing\GatewayContractTests` is the family's contract as PHPUnit tests, offline. It is
 a trait: a provider's test case uses it, gives its factory, fake options and its service's
@@ -158,7 +158,7 @@ No test reaches the network: every request goes to the suite's `MockHttpClient`.
 recorded answer is answered HTTP 404 and named in the failure message (`no recorded answer for:
 ...`).
 
-#### Hooks
+### Hooks
 
 | Method | Must or may | Default | |
 |---|---|---|---|
@@ -174,7 +174,7 @@ recorded answer is answered HTTP 404 and named in the failure message (`no recor
 | `signedNotification(): ?array` | needed when `notify()` is supported | `null` | a webhook as the provider signs it: `[body, headers]` |
 | `tamperedNotification(): array` | may | the signed body with one more character | the same webhook tampered with (PayPal's: a signature PayPal's recorded verification refuses) |
 
-#### What each test checks
+### What each test checks
 
 | Test | Checks |
 |---|---|
@@ -215,7 +215,7 @@ Failed asserting that two arrays are identical.
 (run on 2026-10-25 on the provider of [Writing a provider](providers.md#a-complete-provider), its
 `catch` narrowed on purpose.)
 
-### Running the family's tests
+## Running the family's tests
 
 - In the workspace (`~/Sites/omnitrade`: the core and the six providers as path repositories, one
   `phpunit.xml.dist` with a suite per package): `vendor/bin/phpunit`, 145 tests on 2026-10-25.
