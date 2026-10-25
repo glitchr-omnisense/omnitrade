@@ -33,6 +33,7 @@
         "glitchr/omnitrade": "self.version"
     },
     "suggest": {
+        "phpunit/phpunit": "In a provider's tests: Omnitrade\\Testing\\GatewayContractTests, the family's conformance suite (with symfony/http-client's MockHttpClient)",
         "omnitrade/stripe": "Stripe: cards and wallets through Checkout, refunds, webhooks",
         "omnitrade/paypal": "PayPal: orders, captures, refunds, webhooks",
         "omnitrade/shopify": "Shopify: draft orders paid on its invoice page, orders, webhooks",

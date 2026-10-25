@@ -133,6 +133,17 @@ docker compose run --rm omnitrade test                               # every pac
 - [Connected accounts](docs/connect.md)
 - [Subscriptions](docs/subscriptions.md)
 - [The Docker harness](docs/harness.md)
+- [Writing a provider, the errors' rule and the conformance suite](docs/providers.md)
+
+## Verified, and not
+
+- Run, offline: the conformance suite `Omnitrade\Testing\GatewayContractTests` (docs/providers.md)
+  in each of the six providers (stripe, paypal, shopify, woocommerce, web, amazon), 12 tests each, on
+  recorded answers shaped as each service documents them, and every package's own tests: 145 tests
+  green in the workspace (path repositories, PHP 8.4).
+- Not run: the services themselves. No recorded answer here was captured from a live account;
+  the harness (`docker/`) is where test keys exercise them. Connected accounts and subscriptions
+  are checked by the suite only for "supported or not" and their errors.
 
 ## Responsibility
 
