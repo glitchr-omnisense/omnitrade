@@ -110,3 +110,10 @@ Models and requests check their arguments with PHP's `\InvalidArgumentException`
 | `Payment` | an `applicationFee` without a `destination`; one in another currency, negative or larger than the amount |
 | `Reference` (and `FetchProduct`, `AffiliateLink`, which build one) | neither an id nor a URL |
 | `Subscribe` | an interval other than `day`, `week`, `month`, `year`; an interval count under 1 |
+
+### An exception that escapes the rule
+
+One case is known where a provider lets another library's exception through: `omnitrade/stripe`'s
+`refund()` without an amount throws `Omnipay\Common\Exception\InvalidRequestException` (`The amount
+parameter is required`), before any call. Pass the amount ([payments](usage-payments.md#refund),
+[Verified, and not](verified.md#known-defects)).

@@ -163,17 +163,23 @@ the answer is the order read again (CANCELLED once PayPal voided it).
 ### Refund
 
 ```php
-$refund = $gateway->refund($reference);                                   // all of it
+$refund = $gateway->refund($reference);                                   // all of it (not at Stripe: see below)
 $refund = $gateway->refund($reference, Money::of(500, 'EUR'), idempotencyKey: 'ORDER-1042-refund-1', reason: 'One bottle broken');
 $refund->status;   // REFUNDED, or PENDING while the provider processes it
 ```
 
 | Provider | `$reference` | Call | Notes |
 |---|---|---|---|
-| Stripe | a session (`cs_...`), a payment intent (`pi_...`) or a charge (`ch_...`) | omnipay's refund, `POST /v1/charges/{charge}/refund` | the session and its intent are read to find the charge; `reason` is not sent; `Idempotency-Key` |
+| Stripe | a session (`cs_...`), a payment intent (`pi_...`) or a charge (`ch_...`) | omnipay's refund, `POST /v1/charges/{charge}/refund` | the session and its intent are read to find the charge; `reason` is not sent; `Idempotency-Key`; an amount is required (below) |
 | PayPal | an order (its first capture) or a capture id | `POST /v2/payments/captures/{id}/refund` | `reason` as `note_to_payer` (255 characters); `PayPal-Request-Id: <capture>-refund-<key>` |
 | WooCommerce | an order id | `POST /orders/{id}/refunds`, `api_refund: true` | through the shop's payment gateway; no amount: the order's total; the refund is always REFUNDED |
 | Shopify | - | not supported | Shopify's admin refunds its orders |
+
+> [!WARNING]
+> `omnitrade/stripe` needs the amount: omnipay's refund request requires one, and
+> `refund($reference)` without it throws omnipay's `InvalidRequestException` (`The amount
+> parameter is required`) before any call - not a `ProviderException`. Pass the transaction's
+> amount to refund all of it.
 
 ### Fetch
 
@@ -182,7 +188,7 @@ webhook that did not arrive both rely on it.
 
 | Provider | Read | Status |
 |---|---|---|
-| Stripe | the Checkout session | `payment_status` `paid` or `no_payment_required`: PAID (REFUNDED or PARTIALLY_REFUNDED when its payment intent shows a refund); `status` `expired`: EXPIRED; else PENDING with the session's `url` |
+| Stripe | the Checkout session | `payment_status` `paid` or `no_payment_required`: PAID; `status` `expired`: EXPIRED; else PENDING with the session's `url`. A refund is read only from an expanded payment intent, which the fetch does not ask for: a refunded session reads PAID |
 | PayPal | the order | `COMPLETED` with a capture: PAID, or the capture's `REFUNDED`, `PARTIALLY_REFUNDED`, `DECLINED`/`FAILED` (REFUSED), `PENDING`; `COMPLETED` with an authorization only: AUTHORIZED, or its `VOIDED` (CANCELLED), `EXPIRED`, `DENIED` (REFUSED); `VOIDED`: CANCELLED; else PENDING |
 | Shopify | the draft order and the order it became | completed and paid: PAID (refunded: REFUNDED, PARTIALLY_REFUNDED; voided: CANCELLED); deleted: CANCELLED; else PENDING with the invoice URL |
 | WooCommerce | the order | `processing`, `completed`: PAID (REFUNDED or PARTIALLY_REFUNDED by its refunds); `refunded`: REFUNDED; `cancelled`: CANCELLED; `failed`: REFUSED; else (`pending`, `on-hold`, `checkout-draft`) PENDING with its `payment_url` |

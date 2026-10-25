@@ -56,4 +56,15 @@ What the code does today, where it differs from what one would expect from the c
   (`Action/CaptureAction.php`): after `authorize()` and the buyer's approval, `fetch()` reads the
   order PENDING (not AUTHORIZED) and `void()` throws `The order holds no authorization to void.`
   (`Action/VoidAction.php`).
+- `omnitrade/stripe`'s `refund()` without an amount throws omnipay's `InvalidRequestException`
+  before any call (`Action/RefundAction.php` sets the amount only when given; omnipay's refund
+  requires it; `Api::sendOmnipay()` catches only omnipay's HTTP exceptions): neither a full refund
+  nor the family's `ProviderException`. The conformance suite always refunds an amount, so it does
+  not see it.
+- `omnitrade/stripe` reads a refund from the session's expanded `payment_intent`
+  (`Sessions.php`), which `fetch()` never asks Stripe to expand: a refunded session fetches PAID.
+- `omnitrade/web` checks the final address after redirects only once the page was read
+  (`Api.php`, `page()`): a redirect to a private address is requested before it is refused.
+- `Product::$description` is HTML by the contract; `omnitrade/amazon` gives the features as plain
+  text lines and `omnitrade/web` strips the tags.
 - No provider reads `paymentMethods()`'s amount and country.
