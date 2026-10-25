@@ -1,9 +1,9 @@
 ---
 title: Subscriptions
-order: 40
+order: 35
 ---
 
-# Subscriptions
+## Subscriptions
 
 A payment that renews: the buyer subscribes on the provider's page, the
 provider charges every period and tells of each step by webhook.
@@ -41,7 +41,7 @@ metadata follows the subscription: every later event carries it.
 interval, intervalCount, currentPeriodStart, currentPeriodEnd,
 cancelAtPeriodEnd, cancelledAt, price, metadata, raw.
 
-## Webhooks
+### Webhooks
 
 - the first payment is the session's: `Notification::$transaction` PAID, its
   `raw['subscription']` the subscription's id, `raw['customer']` the customer;
@@ -52,3 +52,21 @@ cancelAtPeriodEnd, cancelledAt, price, metadata, raw.
 
 Only `omnitrade/stripe` answers these requests (Checkout in subscription
 mode, the Billing customer portal).
+
+### What the shortcut leaves out
+
+`subscribe()` takes the payment, the interval, the count and a provider's price. A trial and an
+existing customer go through the request:
+
+```php
+use Omnitrade\Request\Subscribe;
+
+$transaction = $gateway->execute(new Subscribe(
+    payment: $payment,
+    interval: 'month',          // day, week, month or year; anything else is an \InvalidArgumentException
+    intervalCount: 3,           // every three months; under 1 is an \InvalidArgumentException
+    price: null,                // a Stripe price ("price_...") in place of the payment's amount
+    trialDays: 14,
+    customer: 'cus_Q1x',        // the buyer is already Stripe's customer: no customer_email is sent
+))->getTransaction();
+```

@@ -1,22 +1,39 @@
-# Installation and first calls
+---
+title: Installation
+order: 10
+---
+
+## Installation
 
 ```sh
 composer require omniscient/omnitrade omnitrade/paypal            # one provider
 composer require omnitrade/stripe omnitrade/shopify omnitrade/woocommerce omnitrade/web omnitrade/amazon
 ```
 
-PHP 8.2 or later.
+### Requirements
 
-Omnitrade needs no framework. The core requires nothing but `symfony/http-client-contracts`, each
-provider package `symfony/http-client`: two libraries that stand alone. It runs the same in plain
-PHP, in a worker, in Laravel or Slim, and in Symfony, where a bundle does the wiring
-([Symfony](symfony.md)).
+- PHP 8.2 or later.
+- `omniscient/omnitrade` requires `symfony/http-client-contracts` (^3.0) and nothing else.
+- Each provider requires `omniscient/omnitrade` and `symfony/http-client` (^6.4, ^7.0 or ^8.0), a
+  library that stands alone and loads no framework. Besides:
+
+| Package | Also requires |
+|---|---|
+| `omnitrade/stripe` | `ext-bcmath`, `omnipay/stripe` (^3.2) and `omnipay/common` (^3.0), `nyholm/psr7`, `php-http/discovery`, `psr/http-client`, `psr/http-factory` |
+| `omnitrade/paypal` | - |
+| `omnitrade/shopify` | `psr/log` |
+| `omnitrade/woocommerce` | - |
+| `omnitrade/web` | `ext-dom`, `ext-libxml` |
+| `omnitrade/amazon` | - |
+
+Omnitrade needs no framework. It runs the same in plain PHP, in a worker, in Laravel or Slim,
+and in Symfony, where a bundle does the wiring ([Symfony](symfony.md)).
 
 `omnitrade/stripe` stands on [Omnipay](https://omnipay.thephpleague.com) (`omnipay/stripe`), a
 library with no framework either; Omnipay's own requirements come with it, `symfony/http-foundation`
 among them - used as a library for its request object: no kernel, no container.
 
-## Plain PHP
+### Plain PHP
 
 ```php
 <?php // bare.php
@@ -76,10 +93,11 @@ paypal 5O190127TN364715T pending
 send the buyer to https://www.sandbox.paypal.com/checkoutnow?token=5O190127TN364715T
 ```
 
-(run on 2026-10-05 in an empty directory, after `composer require omniscient/omnitrade omnitrade/paypal`;
-every provider asks for an account's keys, so the script answers in PayPal's place, with the order
-id of PayPal's own documentation. With `HttpClient::create()` and a sandbox application's client id
-and secret, the same lines create a real sandbox order.)
+(first run on 2026-10-05 in an empty directory, after `composer require omniscient/omnitrade
+omnitrade/paypal`; run again on 2026-10-25 in the family's harness image, PHP 8.4, with the same
+output. Every provider asks for an account's keys, so the script answers in PayPal's place, with
+the order id of PayPal's own documentation. With `HttpClient::create()` and a sandbox
+application's client id and secret, the same lines create a real sandbox order.)
 
 That is all there is to it:
 
@@ -93,11 +111,16 @@ That is all there is to it:
   `fetch()`, `notify()`, `fetchProducts()`, `fetchProduct()`, `fetchInventory()`,
   `affiliateLink()`... - the same for every provider; `supports()` says beforehand what one does.
 
+Building a gateway calls nothing: a token (PayPal's, Amazon's) is asked for on the first call that
+needs it, and a missing required option is reported by `create()` - or by `Registry::get()` the
+first time the gateway is asked for - as an `InvalidConfigException` naming it
+(`The "paypal" gateway needs: secret.`).
+
 No class of a framework is loaded on the way - a test of this package checks it in a process of
 its own (`Tests/BareTest.php`), and so does `docker compose run --rm omnitrade bare`
 ([harness](harness.md)).
 
-## After the buyer is back
+### After the buyer is back
 
 ```php
 $paid = $gateway->capture($transaction->reference, idempotencyKey: 'attempt-1');   // PayPal: the money is taken now
@@ -107,7 +130,10 @@ $gateway->fetch($transaction->reference);                                       
 $gateway->refund($transaction->reference, Money::of(500, 'EUR'), idempotencyKey: 'refund-42');
 ```
 
-## A webhook
+What each provider does on the way back differs (Stripe takes the money on its page, PayPal on
+`capture()`, Shopify and WooCommerce bring nobody back): [payments](usage-payments.md).
+
+### A webhook
 
 ```php
 use Omnitrade\Exception\InvalidNotificationException;
@@ -120,7 +146,9 @@ try {
 }
 ```
 
-## A product page, no key
+More in [webhooks](usage-webhooks.md).
+
+### A product page, no key
 
 ```php
 use Omnitrade\Web\WebGatewayFactory;
@@ -136,23 +164,16 @@ $web->affiliateLink('https://www.amazon.fr/dp/B0C1234567');                    /
 The catalogue of a platform (Shopify, WooCommerce, Stripe), page by page: [catalogue](catalogue.md).
 Connected accounts: [connect](connect.md). Subscriptions: [subscriptions](subscriptions.md).
 
-## In a framework
+### In a framework
 
 - **Symfony**: `Omnitrade\Bridge\Symfony\OmnitradeBundle` registers the factories on the
   application's `http_client`, builds the registry from `config/packages/omnitrade.yaml` and makes
   each gateway injectable by its name: see [Symfony](symfony.md). Its components
   (`symfony/config`, `symfony/dependency-injection`, `symfony/http-kernel`) are not required by
   this package: a Symfony application has them.
+- **Laravel**: there is no bridge for Omnitrade; a service provider of the application builds the
+  registry once: [Laravel](laravel.md).
 - **Any other**: build the `Registry` once, where the framework builds its services (a service
   provider, a container definition), as the script above does.
 
-## Errors
-
-| Exception | When |
-|---|---|
-| `RequestNotSupportedException` | the provider does not do that (no authorizations at Shopify): `supports()` says so beforehand |
-| `InvalidConfigException` | a gateway not configured, a factory not installed, an option missing |
-| `InvalidNotificationException` | a webhook whose signature does not hold |
-| `ProviderException` | the provider refused, or could not be reached |
-
-All implement `Omnitrade\Exception\OmnitradeException`.
+What each exception means and when it is thrown: [Errors](errors.md).

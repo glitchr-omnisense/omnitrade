@@ -1,4 +1,9 @@
-# Writing a provider
+---
+title: Writing a provider
+order: 80
+---
+
+## Writing a provider
 
 A provider is a package of its own (`omnitrade/<service>`, namespace `Omnitrade\<Service>\`) that
 requires `omniscient/omnitrade` and `symfony/http-client`. It holds:
@@ -15,7 +20,7 @@ What it does not do, it has no action for: `supports()` then says no and the gat
 `RequestNotSupportedException`. An action that depends on an option (Amazon's reads, which need
 credentials) is left out by its closure returning `null`.
 
-## Errors: the family's rule
+### Errors: the family's rule
 
 | What happens | What the provider throws |
 |---|---|
@@ -43,7 +48,7 @@ Pagination: `fetchProducts()` answers a `ProductPage` whose `next` is the cursor
 Money is in minor units (`Money::of(1250, 'EUR')` is 12,50 EUR): a service speaking decimals is
 read with `Money::fromDecimal()` and written with `Money::decimal()`.
 
-## Conformance suite
+### Conformance suite
 
 `Omnitrade\Testing\GatewayContractTests` is the family's contract as PHPUnit tests, offline. Every
 provider's `Tests/<Service>ContractTest.php` uses it:
@@ -112,5 +117,254 @@ What it checks:
 Connected accounts and subscriptions (Stripe) are covered by the "supported or not" and error
 checks only; their answers are tested by the provider's own tests.
 
+Every hook, and what each of the twelve tests checks: [Testing](testing.md#the-conformance-suite).
+
 Run it with the provider's other tests: in the workspace (`~/Sites/omnitrade`, path repositories
 and one `phpunit.xml.dist`), or through the Docker harness (`docker compose run --rm omnitrade test`).
+
+### A complete provider
+
+A payment service of one's own - here "Acme Pay", a hosted page at `api.acme-pay.example` with a
+bearer key - in one file for the reading (a package would put each class in its own file under
+`Omnitrade\AcmePay\`, or the application's namespace for a provider of its own):
+
+```php
+<?php
+
+namespace Acme\Pay;
+
+use Omnitrade\Action\ActionInterface;
+use Omnitrade\Action\ApiAwareInterface;
+use Omnitrade\Action\ApiAwareTrait;
+use Omnitrade\Config;
+use Omnitrade\Exception\ProviderException;
+use Omnitrade\GatewayFactory;
+use Omnitrade\Model\Money;
+use Omnitrade\Model\Status;
+use Omnitrade\Model\Transaction;
+use Omnitrade\Request\FetchTransaction;
+use Omnitrade\Request\Purchase;
+use Omnitrade\Request\Request;
+use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+
+/** A provider of one's own: a hosted payment page at api.acme-pay.example, bearer key. */
+final class AcmePayGatewayFactory extends GatewayFactory
+{
+    protected function populateConfig(Config $config): void
+    {
+        $config->defaults([
+            'omnitrade.factory_name' => 'acme_pay',
+            'omnitrade.factory_title' => 'Acme Pay',
+            'omnitrade.required_options' => ['api_key'],
+            'sandbox' => false,
+            'omnitrade.api' => fn (Config $c) => new Api($this->http ?? HttpClient::create(), (string) $c['api_key'], (bool) $c['sandbox']),
+            'omnitrade.action.purchase' => new PurchaseAction(),
+            'omnitrade.action.fetch' => new FetchAction(),
+        ]);
+    }
+}
+
+final class Api
+{
+    public function __construct(private readonly HttpClientInterface $http, private readonly string $key, private readonly bool $sandbox)
+    {
+    }
+
+    /** @return array<string, mixed> */
+    public function call(string $method, string $path, ?array $json = null): array
+    {
+        try {
+            $response = $this->http->request($method, ($this->sandbox ? 'https://sandbox.acme-pay.example' : 'https://api.acme-pay.example').$path, ['auth_bearer' => $this->key, 'json' => $json, 'timeout' => 15]);
+            $status = $response->getStatusCode();
+            $data = json_decode($response->getContent(false), true);
+        } catch (ExceptionInterface $e) {   // a transport failure too, not only an HTTP status
+            throw new ProviderException('acme_pay', 'Acme Pay request failed: '.$e->getMessage(), null, $e);
+        }
+        if (!\is_array($data)) {
+            throw new ProviderException('acme_pay', \sprintf('Acme Pay answered HTTP %d with a body that is not JSON.', $status));
+        }
+        if ($status >= 400) {
+            throw new ProviderException('acme_pay', (string) ($data['message'] ?? 'HTTP '.$status), isset($data['error']) ? (string) $data['error'] : null);
+        }
+
+        return $data;
+    }
+
+    /** @param array<string, mixed> $payment */
+    public static function transaction(array $payment): Transaction
+    {
+        $status = match ($payment['state'] ?? null) {
+            'succeeded' => Status::PAID,
+            'failed' => Status::REFUSED,
+            default => Status::PENDING,
+        };
+
+        return new Transaction('acme_pay', (string) $payment['id'], $status, Money::of((int) $payment['amount'], (string) $payment['currency']),
+            redirectUrl: Status::PENDING === $status ? ($payment['checkout_url'] ?? null) : null, raw: $payment);
+    }
+}
+
+final class PurchaseAction implements ActionInterface, ApiAwareInterface
+{
+    /** @use ApiAwareTrait<Api> */
+    use ApiAwareTrait;
+
+    public function __construct()
+    {
+        $this->apiClass = Api::class;
+    }
+
+    public function supports(Request $request): bool
+    {
+        return $request instanceof Purchase;
+    }
+
+    public function execute(Request $request): void
+    {
+        \assert($request instanceof Purchase);
+        $payment = $request->payment;
+        $answer = $this->api->call('POST', '/v1/payments', ['amount' => $payment->amount->amount, 'currency' => $payment->amount->currency, 'reference' => $payment->reference, 'return_url' => $payment->returnUrl]);
+        $request->setResult(Api::transaction($answer));
+    }
+}
+
+final class FetchAction implements ActionInterface, ApiAwareInterface
+{
+    /** @use ApiAwareTrait<Api> */
+    use ApiAwareTrait;
+
+    public function __construct()
+    {
+        $this->apiClass = Api::class;
+    }
+
+    public function supports(Request $request): bool
+    {
+        return $request instanceof FetchTransaction;
+    }
+
+    public function execute(Request $request): void
+    {
+        \assert($request instanceof FetchTransaction);
+        $request->setResult(Api::transaction($this->api->call('GET', '/v1/payments/'.rawurlencode($request->reference))));
+    }
+}
+```
+
+Its conformance test, on two recorded answers - the payment created, then read once paid:
+
+```php
+<?php
+
+namespace Acme\Pay\Tests;
+
+use Acme\Pay\AcmePayGatewayFactory;
+use Omnitrade\GatewayFactoryInterface;
+use Omnitrade\Testing\GatewayContractTests;
+use PHPUnit\Framework\TestCase;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+
+
+final class AcmePayContractTest extends TestCase
+{
+    use GatewayContractTests;
+
+    protected function factory(HttpClientInterface $http): GatewayFactoryInterface
+    {
+        return new AcmePayGatewayFactory($http);
+    }
+
+    protected function options(): array
+    {
+        return ['api_key' => 'test_key', 'sandbox' => true];
+    }
+
+    protected function transactionReference(): string
+    {
+        return 'pay_1';
+    }
+
+    protected function recordedAnswers(): array
+    {
+        $payment = ['id' => 'pay_1', 'amount' => 1250, 'currency' => 'EUR'];
+
+        return [
+            'POST /v1/payments' => $payment + ['state' => 'pending', 'checkout_url' => 'https://sandbox.acme-pay.example/pay/pay_1'],
+            'GET /v1/payments/pay_1' => $payment + ['state' => 'succeeded'],
+        ];
+    }
+}
+```
+
+```
+$ vendor/bin/phpunit --testdox tests/AcmePayContractTest.php
+Acme Pay Contract (Acme\Pay\Tests\AcmePayContract)
+ ✔ The factory names the gateway it builds
+ ✔ A missing required option is a configuration error
+ ✔ What it does not support is refused as not supported
+ ✔ What it supports fails as a provider error when the provider does
+ ✔ A purchase is a transaction in minor units
+ ✔ A fetched transaction keeps its invariants
+ ✔ Capture and void answer transactions
+ ✔ A refund is recorded in minor units
+ ✔ Payment methods are described
+ ✔ A signed notification is read and a tampered one refused
+ ✔ A platform order keeps its invariants
+ ✔ The catalogue is paged and its products keep their invariants
+
+OK (12 tests, 67 assertions)
+```
+
+(run on 2026-10-25 in the harness image, PHP 8.4, PHPUnit 11.5.) The tests of what it does not
+do (capture, refunds, webhooks, the catalogue) only check that `supports()` says no. Narrowing the
+`catch` to `HttpExceptionInterface` makes the fourth test fail on the unreachable service: the
+failure is shown in [Testing](testing.md#what-each-test-checks).
+
+What the example follows:
+
+- the factory's name is snake_case (`acme_pay`) and every model carries it as `provider`; the
+  exceptions carry it too;
+- the API client is built by a closure of the `Config`, so building the gateway calls nothing;
+- every failure of the service goes through one method (`Api::call()`) that turns it into a
+  `ProviderException`: `Symfony\Contracts\HttpClient\Exception\ExceptionInterface` (a transport
+  failure included), a body that is not JSON, an HTTP status of 400 or more;
+- money stays in minor units; a decimal service is read with `Money::fromDecimal()` and written
+  with `Money::decimal()`;
+- what the service answered is kept in `raw`.
+
+### The package
+
+A provider package (`omnitrade/<service>` on GitHub as `glitchr-studio/omnitrade-<service>`, or any
+name for a provider of one's own) requires `omniscient/omnitrade` and `symfony/http-client`, and
+`phpunit/phpunit` in `require-dev` for the suite:
+
+```json
+{
+    "name": "omnitrade/acme-pay",
+    "type": "library",
+    "require": {
+        "php": ">=8.2",
+        "omniscient/omnitrade": "^1.0@dev",
+        "symfony/http-client": "^6.4|^7.0|^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {"Omnitrade\\AcmePay\\": ""},
+        "exclude-from-classmap": ["/Tests/"]
+    },
+    "autoload-dev": {
+        "psr-4": {"Omnitrade\\AcmePay\\Tests\\": "Tests/"}
+    }
+}
+```
+
+The Symfony bundle registers the six providers it knows by class; another factory joins the
+registry once it is a service of the application (autoconfigured: tagged
+`omnitrade.gateway_factory`). Its README says what the service is, its credentials, its options
+and, as every provider of the family does, its Responsibility: an unofficial client, the
+service's terms named with a link.
+

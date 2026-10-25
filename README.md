@@ -127,13 +127,22 @@ docker compose run --rm omnitrade test                               # every pac
 
 ## Documentation
 
+The manual, in `docs/` (read in that order, as one page, on the Omniscient site):
+
+- [Overview and providers](docs/index.md): what each provider supports
 - [Installation and first calls](docs/installation.md): plain PHP first
-- [Symfony](docs/symfony.md)
+- [Symfony](docs/symfony.md) and [Laravel](docs/laravel.md)
+- [Concepts](docs/concepts.md): the gateway, factories, the registry, requests, every model
+- [Payments](docs/usage-payments.md) and [webhooks](docs/usage-webhooks.md)
 - [The catalogue and affiliate links](docs/catalogue.md)
 - [Connected accounts](docs/connect.md)
 - [Subscriptions](docs/subscriptions.md)
+- [Configuration reference](docs/configuration.md): every provider's options
+- [Errors](docs/errors.md)
+- [Testing](docs/testing.md): an application's tests, the conformance suite
 - [The Docker harness](docs/harness.md)
 - [Writing a provider, the errors' rule and the conformance suite](docs/providers.md)
+- [Verified, and not](docs/verified.md)
 
 ## Verified, and not
 

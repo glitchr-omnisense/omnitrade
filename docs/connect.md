@@ -1,9 +1,9 @@
 ---
 title: Connected accounts
-order: 30
+order: 34
 ---
 
-# Connected accounts: money for someone else
+## Connected accounts: money for someone else
 
 A platform that takes payments **for others** - the host of a gift fund, a
 seller of a marketplace - never keeps that money: the provider opens an
@@ -34,7 +34,7 @@ $stripe->purchase(new Payment(
 ));
 ```
 
-## Models and requests
+### Models and requests
 
 | Request | Result | Shortcut |
 |---|---|---|
@@ -52,7 +52,7 @@ its amount; refused without a destination). A provider without connected
 accounts ignores neither: it does not support `CreateAccount`, so nothing
 can name a destination there.
 
-## Webhooks
+### Webhooks
 
 `notify()` hands an account's event back with `Notification::$account` (the
 account as it stands) and `isAccount()` true; `$reference` is the account's
@@ -64,3 +64,30 @@ the dashboard).
 |---|---|---|---|---|
 | `omnitrade/stripe` | `POST /v1/accounts` (Express) | `POST /v1/account_links` | `GET /v1/accounts/{id}` | `payment_intent_data[transfer_data][destination]`, `[application_fee_amount]` on the Checkout session |
 | others | not supported | | | |
+
+### What the shortcuts leave out
+
+`createAccount()` sends no business type, the default capabilities (`['transfers']`) and no
+idempotency key; `accountLink()` asks for the onboarding page. The requests take the rest:
+
+```php
+use Omnitrade\Model\Account;
+use Omnitrade\Request\AccountLink;
+use Omnitrade\Request\CreateAccount;
+
+$account = $stripe->execute(new CreateAccount(
+    country: 'FR',
+    email: 'lea@example.org',
+    type: Account::EXPRESS,
+    businessType: 'individual',                     // or "company"; null: asked during onboarding
+    metadata: ['holder' => '42'],
+    capabilities: ['transfers', 'card_payments'],   // where Stripe requires both for destination charges
+    idempotencyKey: 'host-42',                      // the same account asked twice is opened once
+))->getAccount();
+
+$url = $stripe->execute(new AccountLink($account->reference, $returnUrl, $refreshUrl, AccountLink::UPDATE))->getUrl();   // the holder changes their details
+```
+
+An account link is valid a few minutes and used once: `$refreshUrl` is where the holder lands
+when it ran out - make a new one there. Back on `$returnUrl`, ask `fetchAccount()` what is still
+missing: coming back does not mean the onboarding is complete.
