@@ -1,5 +1,5 @@
 {
-    "name": "omniscient/omnitrade",
+    "name": "omnisense/omnitrade",
     "type": "library",
     "description": "Omnitrade: one contract for payment providers and commerce platforms - purchase, authorize, capture, refund, webhooks, platform orders - and its Symfony bundle (Omnibus's sibling for trade).",
     "keywords": [
@@ -30,6 +30,7 @@
         "symfony/http-kernel": "^6.4|^7.0|^8.0"
     },
     "replace": {
+        "omniscient/omnitrade": "self.version",
         "glitchr/omnitrade": "self.version"
     },
     "suggest": {

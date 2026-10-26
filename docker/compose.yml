@@ -1,4 +1,4 @@
-# omniscient/omnitrade with every provider package, your test keys in .env:
+# omnisense/omnitrade with every provider package, your test keys in .env:
 #
 #   cp .env.dist .env                                        # fill in the keys at hand
 #   docker compose run --rm omnitrade gateways               # which providers are installed and configured
@@ -17,7 +17,7 @@ name: omnitrade-harness
 services:
   omnitrade:
     build: .
-    image: omniscient/omnitrade-harness
+    image: omnisense/omnitrade-harness
     env_file:
       - path: .env
         required: false

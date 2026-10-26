@@ -1,4 +1,4 @@
-# omniscient/omnitrade
+# omnisense/omnitrade
 
 Omnitrade is one PHP contract for payment providers and commerce platforms. A shop asks every
 provider the same questions - take this payment, reserve it, capture it, give money back, where
@@ -39,9 +39,9 @@ The core needs no framework: it requires `symfony/http-client-contracts` and not
 provider requires `symfony/http-client`, a library that stands alone. A Symfony bundle is included
 for applications that want the wiring done ([Symfony](symfony.md)).
 
-Published as `omniscient/omnitrade`, formerly `glitchr/omnitrade`: the package `replace`s the old
+Published as `omnisense/omnitrade`, formerly `glitchr/omnitrade`: the package `replace`s the old
 name, so a `composer.json` that still requires `glitchr/omnitrade` resolves to this package and
-never installs both. `omniscient/` is the vendor of every family's core; the providers keep the
+never installs both. `omnisense/` is the vendor of every family's core; the providers keep the
 `omnitrade/` vendor, the namespace is `Omnitrade\` (`Omnitrade\<Provider>\` for a provider) and
 the GitHub repositories keep their names.
 
@@ -70,12 +70,12 @@ Payments:
 
 | Package | Factory name | Purchase | Authorize, capture, void | Refund | Fetch | Payment methods | Notify |
 |---|---|---|---|---|---|---|---|
-| [`omnitrade/stripe`](https://github.com/glitchr-studio/omnitrade-stripe) | `stripe` | yes (Checkout) | - | yes | yes | yes (configured list) | yes |
-| [`omnitrade/paypal`](https://github.com/glitchr-studio/omnitrade-paypal) | `paypal` | yes (Orders v2) | yes | yes | yes | yes (fixed list) | yes (verified by PayPal) |
-| [`omnitrade/shopify`](https://github.com/glitchr-studio/omnitrade-shopify) | `shopify` | yes (draft order invoice) | - | - | yes | - | yes |
-| [`omnitrade/woocommerce`](https://github.com/glitchr-studio/omnitrade-woocommerce) | `woocommerce` | yes (unpaid order) | - | yes | yes | yes (the shop's gateways) | yes |
-| [`omnitrade/web`](https://github.com/glitchr-studio/omnitrade-web) | `web` | - | - | - | - | - | - |
-| [`omnitrade/amazon`](https://github.com/glitchr-studio/omnitrade-amazon) | `amazon` | - | - | - | - | - | - |
+| [`omnitrade/stripe`](https://github.com/glitchr-omnisense/omnitrade-stripe) | `stripe` | yes (Checkout) | - | yes | yes | yes (configured list) | yes |
+| [`omnitrade/paypal`](https://github.com/glitchr-omnisense/omnitrade-paypal) | `paypal` | yes (Orders v2) | yes | yes | yes | yes (fixed list) | yes (verified by PayPal) |
+| [`omnitrade/shopify`](https://github.com/glitchr-omnisense/omnitrade-shopify) | `shopify` | yes (draft order invoice) | - | - | yes | - | yes |
+| [`omnitrade/woocommerce`](https://github.com/glitchr-omnisense/omnitrade-woocommerce) | `woocommerce` | yes (unpaid order) | - | yes | yes | yes (the shop's gateways) | yes |
+| [`omnitrade/web`](https://github.com/glitchr-omnisense/omnitrade-web) | `web` | - | - | - | - | - | - |
+| [`omnitrade/amazon`](https://github.com/glitchr-omnisense/omnitrade-amazon) | `amazon` | - | - | - | - | - | - |
 
 Platform orders, catalogue, affiliate links, connected accounts, subscriptions:
 

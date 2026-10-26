@@ -1,10 +1,10 @@
-# omniscient/omnitrade
+# omnisense/omnitrade
 
 One contract for payment providers and commerce platforms - the Omnibus of trade.
 
-Published as `omniscient/omnitrade` (formerly `glitchr/omnitrade`, which this package replaces: a
+Published as `omnisense/omnitrade` (formerly `glitchr/omnitrade`, which this package replaces: a
 `composer.json` that still requires the old name keeps resolving to this package and never installs
-both). `omniscient/` is the vendor of every family's core, the providers keep `omnitrade/`, the
+both). `omnisense/` is the vendor of every family's core, the providers keep `omnitrade/`, the
 namespace `Omnitrade\` and the GitHub repositories do not change.
 
 ```php
@@ -56,7 +56,7 @@ What every provider answers with is kept whole in `$raw`: normalization loses no
 ## Plain PHP
 
 ```sh
-composer require omniscient/omnitrade omnitrade/paypal
+composer require omnisense/omnitrade omnitrade/paypal
 ```
 
 ```php
@@ -127,7 +127,7 @@ docker compose run --rm omnitrade test                               # every pac
 
 ## Documentation
 
-The manual, in `docs/` (read in that order, as one page, on the Omniscient site):
+The manual, in `docs/` (read in that order, as one page, on the Omnisense site):
 
 - [Overview and providers](docs/index.md): what each provider supports
 - [Installation and first calls](docs/installation.md): plain PHP first
@@ -156,7 +156,7 @@ The manual, in `docs/` (read in that order, as one page, on the Omniscient site)
 
 ## Responsibility
 
-`omniscient/omnitrade` and its `omnitrade/*` providers are independent, unofficial clients: none is
+`omnisense/omnitrade` and its `omnitrade/*` providers are independent, unofficial clients: none is
 affiliated with, endorsed by or sponsored by the services it reaches. Each service keeps its own
 terms (merchant or partner agreements, keys, rate limits, mentions such as the affiliate one), named
 with a link in the "Responsibility" section of the README of each provider that reaches one. The MIT

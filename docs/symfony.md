@@ -7,7 +7,7 @@ order: 15
 
 Omnitrade runs without a framework ([installation](installation.md)); in a Symfony application its
 bundle does the wiring. Its components - `symfony/config`, `symfony/dependency-injection`,
-`symfony/http-kernel` (6.4, 7 or 8) - are not required by `omniscient/omnitrade`: the application
+`symfony/http-kernel` (6.4, 7 or 8) - are not required by `omnisense/omnitrade`: the application
 has them, and nothing of them is loaded outside Symfony.
 
 ## Registering the bundle

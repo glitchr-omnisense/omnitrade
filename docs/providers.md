@@ -6,7 +6,7 @@ order: 80
 # Writing a provider
 
 A provider is a package of its own (`omnitrade/<service>`, namespace `Omnitrade\<Service>\`) that
-requires `omniscient/omnitrade` and `symfony/http-client`. It holds:
+requires `omnisense/omnitrade` and `symfony/http-client`. It holds:
 
 - a factory extending `Omnitrade\GatewayFactory`, taking an optional `HttpClientInterface` in its
   constructor and filling the `Config` in `populateConfig()`: `omnitrade.factory_name` (the name
@@ -336,8 +336,8 @@ What the example follows:
 
 ## The package
 
-A provider package (`omnitrade/<service>` on GitHub as `glitchr-studio/omnitrade-<service>`, or any
-name for a provider of one's own) requires `omniscient/omnitrade` and `symfony/http-client`, and
+A provider package (`omnitrade/<service>` on GitHub as `glitchr-omnisense/omnitrade-<service>`, or any
+name for a provider of one's own) requires `omnisense/omnitrade` and `symfony/http-client`, and
 `phpunit/phpunit` in `require-dev` for the suite:
 
 ```json
@@ -346,7 +346,7 @@ name for a provider of one's own) requires `omniscient/omnitrade` and `symfony/h
     "type": "library",
     "require": {
         "php": ">=8.2",
-        "omniscient/omnitrade": "^1.0@dev",
+        "omnisense/omnitrade": "^1.0@dev",
         "symfony/http-client": "^6.4|^7.0|^8.0"
     },
     "require-dev": {

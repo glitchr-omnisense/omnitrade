@@ -13,7 +13,7 @@ assertions). All of them offline, on answers recorded in the shape each service 
 
 | Package | Tests | |
 |---|---|---|
-| `omniscient/omnitrade` | 13 | the gateway answers through the supporting action and refuses the rest naming itself, required options, the registry builds each gateway once, `Money`'s minor units, `Status`; `Reference` and the catalogue requests; the Symfony bundle (gateways built from configuration, injected by name, an application's factory autoconfigured); `Tests/BareTest.php`: the registry built by hand, a product read and a payment asked with no class of a framework loaded, and the bundle loading the framework |
+| `omnisense/omnitrade` | 13 | the gateway answers through the supporting action and refuses the rest naming itself, required options, the registry builds each gateway once, `Money`'s minor units, `Status`; `Reference` and the catalogue requests; the Symfony bundle (gateways built from configuration, injected by name, an application's factory autoconfigured); `Tests/BareTest.php`: the registry built by hand, a product read and a payment asked with no class of a framework loaded, and the bundle loading the framework |
 | `omnitrade/stripe` | 33 | the conformance suite (12); Checkout purchase, fetch, refund with its idempotency key, signed webhooks, payment methods; Connect (Express account, destination charge and fee, the fee's checks, Stripe's errors), subscriptions (Checkout, read, cancel, portal, the webhook's account and subscription); the catalogue (pages, `updatedSince` among each page, search, a variant per price, recurring prices, no stock, product and price events) |
 | `omnitrade/paypal` | 15 | the conformance suite on an order authorized then captured or voided; an order approved then captured; a refund on the order's capture; a webhook verified by PayPal |
 | `omnitrade/shopify` | 24 | the conformance suite on Admin GraphQL answers; a draft order paid on its invoice, fetched as what became of it; a shop order; a webhook's HMAC and shop; the catalogue (pages, mapping, the `currency` option, finding by id, bare id and page, inventory, REST and GraphQL shapes giving the same product, untracked stock, product and inventory webhooks) |
@@ -26,7 +26,7 @@ runs in each of the six providers; it found and fixed, per the providers' commit
 failures escaping Stripe as omnipay's exception, a voided PayPal authorization read as AUTHORIZED,
 and Shopify's 429 retried after a fixed backoff whatever `Retry-After` said.
 
-The examples of this manual were run on 2026-10-25 in the harness image (`omniscient/omnitrade-harness`,
+The examples of this manual were run on 2026-10-25 in the harness image (`omnisense/omnitrade-harness`,
 PHP 8.4) on the workspace's checkouts, with `MockHttpClient` answers: [installation](installation.md),
 [payments](usage-payments.md), [catalogue](catalogue.md), [testing](testing.md),
 [writing a provider](providers.md), the capability tables of the [index](index.md#providers), the

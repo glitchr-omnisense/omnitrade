@@ -85,7 +85,7 @@ Plain REST calls (catalogue, Connect, subscriptions) have a 30-second timeout; o
 
 | Option | Type | Default | Required | |
 |---|---|---|---|---|
-| `user_agent` | string | `Mozilla/5.0 (compatible; Omnitrade/1.0; +https://github.com/glitchr-studio/omnitrade-web)` | no | what the shop sees |
+| `user_agent` | string | `Mozilla/5.0 (compatible; Omnitrade/1.0; +https://github.com/glitchr-omnisense/omnitrade-web)` | no | what the shop sees |
 | `timeout` | int | `10` | no | seconds |
 | `max_bytes` | int | `3000000` | no | a longer page is cut there |
 | `allow_private` | bool | `false` | no | `true`: addresses of the local network may be read (an intranet, tests) |

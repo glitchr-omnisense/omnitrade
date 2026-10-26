@@ -6,15 +6,15 @@ order: 10
 # Installation
 
 ```sh
-composer require omniscient/omnitrade omnitrade/paypal            # one provider
+composer require omnisense/omnitrade omnitrade/paypal            # one provider
 composer require omnitrade/stripe omnitrade/shopify omnitrade/woocommerce omnitrade/web omnitrade/amazon
 ```
 
 ## Requirements
 
 - PHP 8.2 or later.
-- `omniscient/omnitrade` requires `symfony/http-client-contracts` (^3.0) and nothing else.
-- Each provider requires `omniscient/omnitrade` and `symfony/http-client` (^6.4, ^7.0 or ^8.0), a
+- `omnisense/omnitrade` requires `symfony/http-client-contracts` (^3.0) and nothing else.
+- Each provider requires `omnisense/omnitrade` and `symfony/http-client` (^6.4, ^7.0 or ^8.0), a
   library that stands alone and loads no framework. Besides:
 
 | Package | Also requires |
@@ -93,7 +93,7 @@ paypal 5O190127TN364715T pending
 send the buyer to https://www.sandbox.paypal.com/checkoutnow?token=5O190127TN364715T
 ```
 
-(first run on 2026-10-05 in an empty directory, after `composer require omniscient/omnitrade
+(first run on 2026-10-05 in an empty directory, after `composer require omnisense/omnitrade
 omnitrade/paypal`; run again on 2026-10-25 in the family's harness image, PHP 8.4, with the same
 output. Every provider asks for an account's keys, so the script answers in PayPal's place, with
 the order id of PayPal's own documentation. With `HttpClient::create()` and a sandbox

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Every provider package: its slug (omnitrade/<slug>, github.com/glitchr-studio/omnitrade-<slug>)
+ * Every provider package: its slug (omnitrade/<slug>, github.com/glitchr-omnisense/omnitrade-<slug>)
  * and its factory class.
  */
 return [

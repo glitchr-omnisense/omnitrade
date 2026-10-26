@@ -115,12 +115,12 @@ checkouts beside the core).
 ## How it is put together
 
 `docker/compose.yml` (project `omnitrade-harness`) has one service, `omnitrade`, image
-`omniscient/omnitrade-harness`, which mounts the core at `/omnitrade/core`, the providers'
+`omnisense/omnitrade-harness`, which mounts the core at `/omnitrade/core`, the providers'
 directory (`OMNITRADE_PLUGINS`, else the empty `docker/plugins/`) at `/omnitrade/plugins`, read
 only, and the `harness` volume at `/harness`. At each start the entrypoint runs
 `docker/harness/setup.php`, which writes `/harness/composer.json` and `/harness/phpunit.xml`: the
 core as a path repository, each provider from its checkout under `/omnitrade/plugins/<slug>` when
-there is one, else from `https://github.com/glitchr-studio/omnitrade-<slug>.git` (branch `1.x`),
+there is one, else from `https://github.com/glitchr-omnisense/omnitrade-<slug>.git` (branch `1.x`),
 plus `symfony/console`, `symfony/http-client`, `symfony/var-dumper` and, for the tests, PHPUnit and
 the bundle's Symfony components. It runs `composer install` the first time and `composer update`
 when that file changed, then the command. The first run needs the network; the volume keeps
