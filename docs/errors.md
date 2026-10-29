@@ -46,7 +46,7 @@ new ProviderException(string $provider, string $message, ?string $providerCode =
 | `string $provider` | the gateway's name (`stripe`, `paypal`) |
 | `?string $providerCode` | the provider's own error code, when it gave one |
 | `getMessage()` | `[<provider>] <message>`: the provider's own message when it gave one |
-| `getPrevious()` | the HTTP client's exception, for a transport failure |
+| `getPrevious()` | a copy of the HTTP client's exception, for a transport failure (no secret in it) |
 
 There is no exception per status: a 401 is a `ProviderException` like a 500, its message and
 `providerCode` saying which. What each provider puts there:
@@ -62,11 +62,22 @@ There is no exception per status: a 401 is a `ProviderException` like a 500, its
 
 A body that is not JSON (an HTML error page from a proxy) is `... answered HTTP <status> with a
 body that is not JSON.`; a transport failure (DNS, connection, timeout) is `... request failed:
-<the HTTP client's message>`, that exception as `previous`. `Omnitrade\Shopify\Api\ShopifyApiException`
+<the HTTP client's message>`, a copy of that exception as `previous`, the secrets masked. `Omnitrade\Shopify\Api\ShopifyApiException`
 is Shopify's `ProviderException`, with the errors Shopify gave in `$errors`.
 
 `Gateway::execute()` also throws a `ProviderException` when an action returns without answering
 (`<action class> left the request unanswered.`): a provider package's bug.
+
+## No secret in a failure
+
+What a provider throws keeps the request's secrets out, for a log that writes the whole chain,
+arguments included (`zend.exception_ignore_args` off). The HTTP client's message quotes the URL
+called: in the `ProviderException`'s message its key parameters, a password in its user part and every secret
+of the request (a key, a password, a bearer or basic credential) are masked as `***`
+(`Omnitrade\Http\Redaction::text()`). The previous exception is a copy of the client's
+(`Redaction::copy()`: the same class and code, that message, its own previous copied the same
+way, without the response or request a client's exception holds), and no trace of the chain keeps
+its arguments, where the options, headers and body stood (`Redaction::withoutArguments()`).
 
 ## Real messages
 
