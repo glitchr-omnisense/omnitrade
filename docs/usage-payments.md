@@ -146,37 +146,26 @@ $paid = $paypal->capture($transaction->reference, Money::of(1000, 'EUR'));   // 
 the return page and the webhook may both call it. An order the buyer has not approved is a
 `ProviderException` (`The order is PAYER_ACTION_REQUIRED: the buyer has not approved it.`). For an
 order made with intent `AUTHORIZE`, `capture()` asks PayPal for the authorization
-(`POST /v2/checkout/orders/{id}/authorize`) when the order holds none yet, then captures it.
+(`POST /v2/checkout/orders/{id}/authorize`) when the order holds none yet, then captures it;
+`fetch()` and `void()` ask for it too, so an approved order reads AUTHORIZED and can be voided.
 
 `void($reference)` takes the order's id or an authorization's id and lets the authorization go;
 the answer is the order read again (CANCELLED once PayPal voided it).
 
-> [!WARNING]
-> `omnitrade/paypal` asks for the authorization only inside `capture()`. After `authorize()` and
-> the buyer's approval, the order holds no authorization yet: `fetch()` reads it PENDING, and
-> `void()` throws `The order holds no authorization to void.` Letting go of an approved order that
-> was never captured is done in PayPal's dashboard, or by leaving it to expire.
-
 ## Refund
 
 ```php
-$refund = $gateway->refund($reference);                                   // all of it (not at Stripe: see below)
+$refund = $gateway->refund($reference);                                   // all of it
 $refund = $gateway->refund($reference, Money::of(500, 'EUR'), idempotencyKey: 'ORDER-1042-refund-1', reason: 'One bottle broken');
 $refund->status;   // REFUNDED, or PENDING while the provider processes it
 ```
 
 | Provider | `$reference` | Call | Notes |
 |---|---|---|---|
-| Stripe | a session (`cs_...`), a payment intent (`pi_...`) or a charge (`ch_...`) | omnipay's refund, `POST /v1/charges/{charge}/refund` | the session and its intent are read to find the charge; `reason` is not sent; `Idempotency-Key`; an amount is required (below) |
+| Stripe | a session (`cs_...`), a payment intent (`pi_...`) or a charge (`ch_...`) | omnipay's refund, `POST /v1/charges/{charge}/refund`; without an amount `POST /v1/refunds` with the charge (all of it) | the session and its intent are read to find the charge; `reason` is not sent; `Idempotency-Key` |
 | PayPal | an order (its first capture) or a capture id | `POST /v2/payments/captures/{id}/refund` | `reason` as `note_to_payer` (255 characters); `PayPal-Request-Id: <capture>-refund-<key>` |
 | WooCommerce | an order id | `POST /orders/{id}/refunds`, `api_refund: true` | through the shop's payment gateway; no amount: the order's total; the refund is always REFUNDED |
 | Shopify | - | not supported | Shopify's admin refunds its orders |
-
-> [!WARNING]
-> `omnitrade/stripe` needs the amount: omnipay's refund request requires one, and
-> `refund($reference)` without it throws omnipay's `InvalidRequestException` (`The amount
-> parameter is required`) before any call - not a `ProviderException`. Pass the transaction's
-> amount to refund all of it.
 
 ## Fetch
 
@@ -192,13 +181,14 @@ webhook that did not arrive both rely on it.
 
 ## Payment methods
 
-`paymentMethods(?Money $for, ?string $country)` lists what the provider can take. No provider reads
-`$for` or `$country` yet: the list is the same whatever the amount.
+`paymentMethods(?Money $for, ?string $country)` lists what the provider can take. Stripe narrows it
+by the amount's currency (its euro-only methods), PayPal its Pay Later by the country and the
+currency; WooCommerce lists the gateways the shop enabled whatever the amount, the shop choosing.
 
 | Provider | List |
 |---|---|
-| Stripe | the `payment_methods` option when set (`card`, `sepa_debit`, `klarna`... labelled from a table of eleven known codes), else `card`, `apple_pay`, `google_pay`, `link` |
-| PayPal | always `paypal` (wallet), `card` (guest checkout), `paylater` (buy now, pay later) |
+| Stripe | the `payment_methods` option when set (`card`, `sepa_debit`, `klarna`... labelled from a table of eleven known codes), else `card`, `apple_pay`, `google_pay`, `link`; `sepa_debit`, `bancontact`, `ideal`, `eps` left out of an amount not in euros |
+| PayPal | `paypal` (wallet), `card` (guest checkout), and `paylater` (buy now, pay later) in AU, FR, DE, IT, ES, GB, US in their currency |
 | WooCommerce | the shop's payment gateways enabled (`GET /payment_gateways`), their kind guessed from their id (`stripe`/`card`: card, `paypal`/`apple`/`google`: wallet, `bacs`/`sepa`/`bank`: bank, `klarna`/`afterpay`: buy now pay later) |
 
 ## Idempotency
@@ -210,5 +200,5 @@ and keep it with the attempt.
 | Provider | How it is sent |
 |---|---|
 | Stripe | `Idempotency-Key` on the session's creation and on the refund |
-| PayPal | `PayPal-Request-Id`: `<reference>-<key>` (purchase, authorize), `<order>-capture-<key>`, `<capture>-refund-<key>`; the purchase's `invoice_id` is `<reference>-<key>` too |
+| PayPal | `PayPal-Request-Id`: `<reference>-<key>` (purchase, authorize), `<order>-capture-<key>`, `<order>-authorize`, `<capture>-refund-<key>`; the purchase's `invoice_id` is `<reference>-<key>` too |
 | Shopify, WooCommerce | not sent |

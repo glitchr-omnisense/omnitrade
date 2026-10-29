@@ -328,7 +328,7 @@ All `final readonly`, under `Omnitrade\Model` (a summary also in [catalogue](cat
 | `provider` | `string` | |
 | `reference` | `string` | the platform's id (a Shopify gid, a WooCommerce id, a Stripe `prod_...`, an ASIN, a page's canonical address) |
 | `title` | `string` | |
-| `description` | `?string` | HTML, as the platform holds it (plain text from Amazon's features and from a web page) |
+| `description` | `?string` | HTML, as the platform holds it (Amazon's features as an escaped list, a web page's text escaped with `<br>` between its lines) |
 | `handle` | `?string` | its handle or slug there |
 | `brand` | `?string` | Shopify's vendor, WooCommerce's brand, a `brand` metadata |
 | `url` | `?string` | the product page, when there is one |

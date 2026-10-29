@@ -61,7 +61,6 @@ Plain REST calls (catalogue, Connect, subscriptions) have a 30-second timeout; o
 | `shop_domain` | string | - | yes | `example.myshopify.com` |
 | `admin_token` | string | - | yes | a custom app's Admin API access token (`shpat_...`) |
 | `webhook_secret` | ?string | `null` | for `notify()` | the app's API secret, which signs its webhooks |
-| `storefront_token` | ?string | `null` | no | a Storefront API token; the API client is built with it, but no action calls the Storefront API |
 | `api_version` | string | `2026-07` | no | the Admin API version in `https://<shop>/admin/api/<version>/graphql.json` |
 | `timeout` | int | `15` | no | seconds |
 | `draft_order_tags` | list of strings | `[]` | no | tags put on the draft orders `purchase()` creates |

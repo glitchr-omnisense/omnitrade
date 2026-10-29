@@ -14,8 +14,8 @@ assertions). All of them offline, on answers recorded in the shape each service 
 | Package | Tests | |
 |---|---|---|
 | `omnisense/omnitrade` | 13 | the gateway answers through the supporting action and refuses the rest naming itself, required options, the registry builds each gateway once, `Money`'s minor units, `Status`; `Reference` and the catalogue requests; the Symfony bundle (gateways built from configuration, injected by name, an application's factory autoconfigured); `Tests/BareTest.php`: the registry built by hand, a product read and a payment asked with no class of a framework loaded, and the bundle loading the framework |
-| `omnitrade/stripe` | 36 | the conformance suite (12); Checkout purchase (the shipping as the session's shipping rate, a discount as one line of the amount), fetch (a refunded session REFUNDED), refund with its idempotency key, signed webhooks, payment methods; Connect (Express account, destination charge and fee, the fee's checks, Stripe's errors), subscriptions (Checkout, read, cancel, portal, the webhook's account and subscription); the catalogue (pages, `updatedSince` among each page, search, a variant per price, recurring prices, no stock, product and price events) |
-| `omnitrade/paypal` | 15 | the conformance suite on an order authorized then captured or voided; an order approved then captured; a refund on the order's capture; a webhook verified by PayPal |
+| `omnitrade/stripe` | 38 | the conformance suite (12); Checkout purchase (the shipping as the session's shipping rate, a discount as one line of the amount), fetch (a refunded session REFUNDED), refund with its idempotency key, signed webhooks, payment methods; Connect (Express account, destination charge and fee, the fee's checks, Stripe's errors), subscriptions (Checkout, read, cancel, portal, the webhook's account and subscription); the catalogue (pages, `updatedSince` among each page, search, a variant per price, recurring prices, no stock, product and price events) |
+| `omnitrade/paypal` | 17 | the conformance suite on an order authorized then captured or voided; an order approved then captured; a refund on the order's capture; a webhook verified by PayPal |
 | `omnitrade/shopify` | 24 | the conformance suite on Admin GraphQL answers; a draft order paid on its invoice, fetched as what became of it; a shop order; a webhook's HMAC and shop; the catalogue (pages, mapping, the `currency` option, finding by id, bare id and page, inventory, REST and GraphQL shapes giving the same product, untracked stock, product and inventory webhooks) |
 | `omnitrade/woocommerce` | 23 | the conformance suite on REST v3 answers; an unpaid order paid on the shop's checkout, fetched by status, a refund and the payment methods, a signed webhook; the catalogue (pages, published only, simple and variable products, finding by id, slug or variation, inventory, product webhooks) |
 | `omnitrade/web` | 36 | the conformance suite on a recorded product page; JSON-LD in a graph, a ProductGroup and its variants, microdata, OpenGraph, no product, the local network refused (IPv4 and IPv6, a redirect to it refused before it is requested, a name requested at the address checked), affiliate links, prices in every writing |
@@ -47,17 +47,4 @@ PHP 8.4) on the workspace's checkouts, with `MockHttpClient` answers: [installat
 
 ## Known defects
 
-What the code does today, where it differs from what one would expect from the contract:
-
-- `omnitrade/paypal` asks for an AUTHORIZE order's authorization only inside `capture()`
-  (`Action/CaptureAction.php`): after `authorize()` and the buyer's approval, `fetch()` reads the
-  order PENDING (not AUTHORIZED) and `void()` throws `The order holds no authorization to void.`
-  (`Action/VoidAction.php`).
-- `omnitrade/stripe`'s `refund()` without an amount throws omnipay's `InvalidRequestException`
-  before any call (`Action/RefundAction.php` sets the amount only when given; omnipay's refund
-  requires it; `Api::sendOmnipay()` catches only omnipay's HTTP exceptions): neither a full refund
-  nor the family's `ProviderException`. The conformance suite always refunds an amount, so it does
-  not see it.
-- `Product::$description` is HTML by the contract; `omnitrade/amazon` gives the features as plain
-  text lines and `omnitrade/web` strips the tags.
-- No provider reads `paymentMethods()`'s amount and country.
+None known: the last ones, found by the providers' manuals, were fixed on 2026-10-29.
