@@ -105,12 +105,9 @@ line: 1 x Colissimo 350
 The refund reads the session, then its payment intent, to find the charge it refunds: three
 calls. Stripe's Checkout takes the money on its page, so there is no `capture()` here.
 
-> [!WARNING]
-> `omnitrade/stripe` lists the lines on the Checkout page without `Payment::$shipping` and
-> `Payment::$discount` (it sends the lines only, when they add up with them): a payment whose
-> lines add up to the amount through a shipping or a discount is charged the lines' total. Give
-> the postage as a line, and a discount in the lines' prices, as above, or give no lines (the
-> amount is then one line). The other providers send both.
+`omnitrade/stripe` sends `Payment::$shipping` as the Checkout session's shipping rate, on top of
+the lines; a payment with a `discount` is one line of its amount there (Checkout takes a discount
+only as a coupon made beforehand). The other providers send both as such.
 
 ## Purchase
 
@@ -130,7 +127,7 @@ if ($transaction->isRedirect()) {
 | WooCommerce | an order, `status: pending`, `set_paid: false` | PENDING, its `payment_url` | nobody comes back: `fetch()` or the `order.updated` webhook |
 
 Stripe and PayPal need `returnUrl`: without it they throw a `ProviderException` before any call.
-The lines are listed when `Payment::linesAddUp()` (with the warning above for Stripe); otherwise the
+The lines are listed when `Payment::linesAddUp()` (at Stripe, with no discount, above); otherwise the
 amount is one line named by the description, else the reference. Which other fields each provider
 sends: [configuration](configuration.md#what-each-provider-reads-of-a-payment).
 
@@ -188,7 +185,7 @@ webhook that did not arrive both rely on it.
 
 | Provider | Read | Status |
 |---|---|---|
-| Stripe | the Checkout session | `payment_status` `paid` or `no_payment_required`: PAID; `status` `expired`: EXPIRED; else PENDING with the session's `url`. A refund is read only from an expanded payment intent, which the fetch does not ask for: a refunded session reads PAID |
+| Stripe | the Checkout session | `payment_status` `paid` or `no_payment_required`: PAID; `status` `expired`: EXPIRED; else PENDING with the session's `url`; refunded (the payment intent's latest charge, expanded): REFUNDED or PARTIALLY_REFUNDED |
 | PayPal | the order | `COMPLETED` with a capture: PAID, or the capture's `REFUNDED`, `PARTIALLY_REFUNDED`, `DECLINED`/`FAILED` (REFUSED), `PENDING`; `COMPLETED` with an authorization only: AUTHORIZED, or its `VOIDED` (CANCELLED), `EXPIRED`, `DENIED` (REFUSED); `VOIDED`: CANCELLED; else PENDING |
 | Shopify | the draft order and the order it became | completed and paid: PAID (refunded: REFUNDED, PARTIALLY_REFUNDED; voided: CANCELLED); deleted: CANCELLED; else PENDING with the invoice URL |
 | WooCommerce | the order | `processing`, `completed`: PAID (REFUNDED or PARTIALLY_REFUNDED by its refunds); `refunded`: REFUNDED; `cancelled`: CANCELLED; `failed`: REFUSED; else (`pending`, `on-hold`, `checkout-draft`) PENDING with its `payment_url` |

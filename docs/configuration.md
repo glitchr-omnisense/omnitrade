@@ -119,8 +119,8 @@ same at PayPal), from the code:
 | `description` | the single line's name | `description` (127) | the draft order's `note`, the single line's title | the single item's name |
 | `customer` | `email` (`customer_email`) | `email` (`payment_source.paypal.email_address`) | `email` | `billing`: email, name (first word / the rest), phone, street (two lines), postal code, city, country |
 | `lines` | name, image, unit amount, quantity | name (127), quantity, unit amount, `sku`, `physical` (category `PHYSICAL_GOODS` / `DIGITAL_GOODS`) | a variant gid in `reference` names the variant, else a custom line (title, `physical` as `requiresShipping`, `sku`) | name, quantity, total; a numeric `reference` as `product_id` |
-| `shipping` | not sent | `breakdown.shipping` | `shippingLine` | a `flat_rate` shipping line |
-| `discount` | not sent | `breakdown.discount` | `appliedDiscount`, fixed amount | a negative fee line |
+| `shipping` | `shipping_options[0][shipping_rate_data]`, a fixed amount (when the lines are listed) | `breakdown.shipping` | `shippingLine` | a `flat_rate` shipping line |
+| `discount` | not sent as such: the amount is one line | `breakdown.discount` | `appliedDiscount`, fixed amount | a negative fee line |
 | `returnUrl` | required, `success_url` | required, `experience_context.return_url` | not used | not used |
 | `cancelUrl` | `cancel_url` (else `returnUrl?cancel=1`) | `experience_context.cancel_url` | not used | not used |
 | `idempotencyKey` | `Idempotency-Key` | `PayPal-Request-Id`, `invoice_id` | not used | not used |
