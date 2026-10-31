@@ -2,6 +2,12 @@
 
 ## Unreleased (1.x)
 
+### Documentation
+
+- `docs/usage-webhooks.md`: webhooks are optional - a scheduled read catches up everything they
+  say, and a development machine needs neither a tunnel nor a webhook registered (never a
+  `localhost` URL at the provider).
+
 ### Added
 - `Http\Redaction`: what the providers call at their catch of the HTTP client's exception, so
   that a `ProviderException` carries none of the request's secrets - its message with the key's

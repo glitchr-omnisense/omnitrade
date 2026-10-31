@@ -5,6 +5,12 @@ order: 32
 
 # Webhooks
 
+**Webhooks are optional.** A payment can always be read from the provider: keep the reference
+`purchase()` gave (`Transaction::$reference`), and `fetch()` it again on a schedule until it is
+paid, refused or given up - omnibase/estate's `estate:payment:check` does this every 15 minutes
+for rents. The webhook only records a payment sooner. A development machine, which no provider can
+reach, needs no tunnel nor `stripe listen`: leave `webhook_secret` empty there.
+
 `notify(string $body, array $headers = [])` reads what a provider sends to the shop's webhook
 endpoint: it checks the signature first, then reads the event as one `Notification`. Hand it the
 **raw** body (re-encoding JSON breaks the signature) and the request's headers; a header is found
