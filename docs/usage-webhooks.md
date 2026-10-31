@@ -50,6 +50,45 @@ whichever comes first (the return page's `fetch()` or the webhook), and keep the
 `purchase()` answered (for Shopify, the draft order). The [payments](usage-payments.md#a-complete-payment-from-the-order-to-the-refund)
 example signs and reads a Stripe event, offline.
 
+## Registering the webhook from the application
+
+Nobody needs to copy a signing secret from a provider's console: a gateway that supports
+`RegisterWebhook` registers the shop's endpoint itself and answers the secret the provider made.
+
+```php
+use Omnitrade\Http\PublicUrl;
+use Omnitrade\Request\DeleteWebhook;
+use Omnitrade\Request\FetchWebhooks;
+use Omnitrade\Request\RegisterWebhook;
+
+$url = 'https://shop.example.org/payments/webhook';
+if (null !== $why = PublicUrl::unreachable($url)) {
+    return $why;    // localhost, *.local, *.test, a private IP, plain HTTP: no provider reaches it
+}
+if ($gateway->supports(RegisterWebhook::class)) {
+    $gateway->execute($request = new RegisterWebhook($url));   // no events: those notify() reads
+    $webhook = $request->getWebhook();   // $id, $url, $events, $secret
+    $secrets->store('webhook_secret', $webhook->secret);   // your sealed storage: never a log, a file
+}
+
+$gateway->execute($list = new FetchWebhooks());     // list<Webhook>, without secrets
+$gateway->execute(new DeleteWebhook($webhook->id)); // true, also when it was already gone
+```
+
+- **Idempotent.** Registering an address already registered replaces it: the provider's former
+  webhook on that address is deleted and a new one made, with a new secret (providers give the
+  secret once, at creation). Run it at each deploy; keep the secret it answers.
+- **Optional.** A gateway without the request answers `supports(RegisterWebhook::class)` false
+  and `execute()` throws `RequestNotSupportedException`.
+- **Read the stored secret at `notify()` time**: `Registry::create($name, ['webhook_secret' =>
+  $sealed])` builds the gateway over the configured options. A secret configured (an env value)
+  still wins, for those who prefer it.
+
+| Provider | Registers | Events registered | Notes |
+|---|---|---|---|
+| Stripe | `/v1/webhook_endpoints` | `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired` | the endpoint's `api_version` is the gateway's (`api_version`, `2020-08-27` by default), so events come in the version `notify()` reads |
+| PayPal, Shopify, WooCommerce, Amazon | - | - | not supported yet |
+
 ## What each provider checks
 
 | Provider | Signature | Without the secret |
