@@ -85,7 +85,8 @@ naming it, the first time the gateway is asked for.
 
 Every `omnitrade/*` provider package installed has its factory registered as a service, on the
 application's `http_client` service (`nullOnInvalid()`: with no HTTP client service, the factory
-makes its own). The bundle knows the six providers of the [table](index.md#providers) and
+makes its own), kept with its retries off (omnisense/contracts' `Http\NoRetry`: a payment is never
+sent twice by `framework.http_client`'s `retry_failed`). The bundle knows the six providers of the [table](index.md#providers) and
 registers those whose class exists. What the container holds, with `card` and `paypal`
 configured:
 

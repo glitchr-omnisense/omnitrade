@@ -25,6 +25,8 @@ use Omnitrade\Request\Purchase;
 use Omnitrade\Request\Request;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Retry\GenericRetryStrategy;
+use Symfony\Component\HttpClient\RetryableHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -127,6 +129,29 @@ final class PolicyTest extends TestCase
         $again = $this->sent[$before] ?? null;
         self::assertIsArray($again);
         self::assertSame('attempt-1', $again[1]['Idempotency-Key'] ?? null, 'the same key, so the provider makes it once');
+    }
+
+    /**
+     * The application's http_client with retry_failed on: Symfony's RetryableHttpClient would send
+     * the payment again on a 503. The factory keeps its retries off: sent once, the 503 surfaced.
+     */
+    public function testAPaymentAnswered503IsSentOnceThroughARetryingClient(): void
+    {
+        $this->answers = [new MockResponse('{"error":"unavailable"}', ['http_code' => 503]), self::paid()];
+        $retrying = new RetryableHttpClient($this->http(), new GenericRetryStrategy(GenericRetryStrategy::DEFAULT_RETRY_STATUS_CODES, 0), 3);
+        $gateway = (new PoliciedFactory($retrying))->create(['token' => 't']);
+
+        self::assertFalse($gateway->purchase(Fixtures::payment())->isPaid());
+        self::assertCount(1, $this->sent, 'the 503 was not retried by the client');
+        self::assertCount(1, $this->answers, 'the second answer was never asked for');
+    }
+
+    public function testAMockHttpClientIsKeptAsGiven(): void
+    {
+        $mock = new MockHttpClient([self::paid()]);
+        (new PoliciedFactory($mock))->create(['token' => 't'])->purchase(Fixtures::payment());
+
+        self::assertSame(1, $mock->getRequestsCount());
     }
 
     public function testAWebhookIsNeverHeldByTheGuard(): void

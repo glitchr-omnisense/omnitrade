@@ -17,6 +17,11 @@
   omnisense/contracts and the HTTP client contracts alone).
 
 ### Added
+- Writes sent once: the HTTP client a factory is given keeps its retries off
+  (omnisense/contracts' `Http\NoRetry`, which omnisense/contracts 1568f2c brings; with an older
+  kernel the client is kept as given), so Symfony's `RetryableHttpClient` (`framework.http_client`'s
+  `retry_failed`) never sends a payment, a capture, a refund or an order twice. A `MockHttpClient`
+  is kept as given. docs/policies.md.
 - Usage policies: a provider declares its policy (`omnitrade.policy`: its `policy.json`), a gateway
   gives it (`DeclaresUsagePolicyInterface`) with its operations (`capabilities()`, `Capabilities`,
   `Gateway::OPERATIONS`); `Registry::policy()`, `policies()`, `guard()` and `guarded()` (the gateway
