@@ -12,6 +12,10 @@ namespace Omnitrade\Model;
  * moved) is one too, as are a connected account's ($account) and a
  * subscription's ($subscription: started, renewed, past due, ended): $reference is then the product's id there, $product the
  * product as the event carries it (null for a deletion), $stocks the levels.
+ *
+ * $tags are the labels the object carries (the gateway's "tags" option when
+ * it made it): a site sharing a provider account with others skips the
+ * events of theirs - isFromAnotherSite('solstay').
  */
 final readonly class Notification
 {
@@ -33,7 +37,32 @@ final readonly class Notification
         public ?Account $account = null,
         /** A subscription's event (created, renewed, changed, ended): the subscription as it stands. */
         public ?Subscription $subscription = null,
+        /**
+         * The tags the event's object carries (Model\Tags: "site" among them
+         * when the gateway that made it had one), as the provider gave them back.
+         *
+         * @var array<string, string>
+         */
+        public array $tags = [],
     ) {
+    }
+
+    /** The site whose gateway made the event's object, when its tags say. */
+    public function site(): ?string
+    {
+        $site = $this->tags[Tags::SITE] ?? null;
+
+        return null !== $site && '' !== $site ? $site : null;
+    }
+
+    /**
+     * Whether the event is about another site's object: its "site" tag names
+     * a site, and not this one. An event without the tag (an object made in
+     * the provider's dashboard, a provider that keeps no tag) is not.
+     */
+    public function isFromAnotherSite(?string $site): bool
+    {
+        return null !== $site && null !== $this->site() && $this->site() !== $site;
     }
 
     public function isAccount(): bool

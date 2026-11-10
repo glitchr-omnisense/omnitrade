@@ -31,6 +31,12 @@ is an `InvalidConfigException` naming every missing one. An option no code reads
 `Config` and ignored. Every key of the `Config` can be given as an option, the reserved ones
 included: `omnitrade.action.<name>` replaces a provider's action ([Concepts](concepts.md#factory-and-config)).
 
+One option belongs to every provider:
+
+| Option | Type | Default | |
+|---|---|---|---|
+| `tags` | map of names to text | none | labels put on everything the gateway creates at the provider (payments, checkout sessions, refunds, subscriptions, accounts), under the call's own metadata, which wins on a key both have; `site` is reserved: the configuration's always wins. A list or a nested value is an `InvalidConfigException`. Where each provider keeps them: [Several sites in one sandbox](several-sites.md) |
+
 ## omnitrade/stripe
 
 | Option | Type | Default | Required | |

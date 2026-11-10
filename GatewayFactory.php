@@ -4,14 +4,18 @@ namespace Omnitrade;
 
 use Omnitrade\Action\ActionInterface;
 use Omnitrade\Action\ApiAwareInterface;
+use Omnitrade\Action\TagsAwareInterface;
 use Omnitrade\Http\Redaction;
+use Omnitrade\Model\Tags;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * The Omnibus way: a provider's factory fills a Config - its name, title,
  * the options it needs, its API client ("omnitrade.api", a closure of the
  * Config) and its actions ("omnitrade.action.<name>") - and the gateway is
- * those actions, the API handed to the ones that ask for it.
+ * those actions, the API handed to the ones that ask for it, and the
+ * gateway's tags (the "tags" option, Model\Tags) to the ones that label what
+ * they create.
  */
 abstract class GatewayFactory implements GatewayFactoryInterface
 {
@@ -29,6 +33,7 @@ abstract class GatewayFactory implements GatewayFactoryInterface
         try {
             $config = $this->createConfig($options);
             $config->validateNotEmpty($config->get('omnitrade.required_options', []));
+            $tags = Tags::fromOption($config->get('tags'));
 
             $api = $config->get('omnitrade.api');
             if ($api instanceof \Closure) {
@@ -48,6 +53,9 @@ abstract class GatewayFactory implements GatewayFactoryInterface
                 }
                 if ($action instanceof ApiAwareInterface && null !== $api) {
                     $action->setApi($api);
+                }
+                if ($action instanceof TagsAwareInterface) {
+                    $action->setTags($tags);
                 }
                 $actions[] = $action;
             }

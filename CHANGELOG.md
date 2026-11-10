@@ -9,6 +9,14 @@
   `localhost` URL at the provider).
 
 ### Added
+- The `tags` option, every provider's: labels (`site: solstay`) put on everything a gateway
+  creates at the provider, under the call's own metadata, which wins on a key both have but
+  `site`, the configuration's (`Model\Tags`: `fromOption()`, `merge()`, `site()`). The factory
+  hands them to the actions that create things (`Action\TagsAwareInterface`, `TagsAwareTrait`);
+  a list or a nested value is an `InvalidConfigException`. `Notification::$tags` gives back the
+  tags the event's object carries, `site()` and `isFromAnotherSite()` tell another site's event.
+  `docs/several-sites.md`: a restricted key, a webhook endpoint and the tag per site, filtering,
+  what each provider keeps and what it cannot.
 - Registering the webhook from the application, an optional capability (no change to
   `GatewayInterface`): `Request\RegisterWebhook` (URL, events; registering an address again
   replaces it), answered by a `Model\Webhook` (provider id, URL, events, and the signing secret,

@@ -306,9 +306,12 @@ transaction, product, account or subscription.
 | `stocks` | `list<Stock>` | a stock event's levels |
 | `account` | `?Account` | a connected account's event: the account as it stands |
 | `subscription` | `?Subscription` | a subscription's event: the subscription as it stands |
+| `tags` | `array<string, string>` | the labels the event's object carries: the `tags` option of the gateway that made it, `site` among them ([Several sites in one sandbox](several-sites.md)) |
 
 `isAccount()` and `isSubscription()` test `account` and `subscription`; `isCatalogue()` is true
 when there is a product or stocks, or when the event's name starts with `product` or `inventory`.
+`site()` gives `tags['site']`; `isFromAnotherSite('solstay')` is true when the object names another
+site (an event without the tag is not).
 
 ## PlatformOrder
 

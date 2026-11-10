@@ -101,6 +101,8 @@ own manual lists its options, credentials and behaviour.
 - Usage: [payments](usage-payments.md) (purchase, authorize, capture, void, refund, fetch,
   payment methods), [webhooks](usage-webhooks.md), [the catalogue and affiliate
   links](catalogue.md), [connected accounts](connect.md), [subscriptions](subscriptions.md).
+- [Several sites in one sandbox](several-sites.md): a key, a webhook endpoint and a `site` tag
+  per site, so that demo sites share one provider account.
 - [Configuration reference](configuration.md): the registry's configuration and every
   provider's options, and which `Payment` fields each provider reads.
 - [Errors](errors.md): the four exceptions, when each is thrown, what to catch.
