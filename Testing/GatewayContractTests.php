@@ -57,6 +57,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * recorded answer is answered HTTP 404 and named in the failure.
  *
  * Requires phpunit/phpunit and symfony/http-client (the provider's, in require-dev).
+ *
+ * @suggested phpunit/phpunit (test support: loaded by a provider's tests only, with symfony/http-client)
  */
 trait GatewayContractTests
 {

@@ -1,7 +1,7 @@
 {
     "name": "omnisense/omnitrade",
     "type": "library",
-    "description": "Omnitrade: one contract for payment providers and commerce platforms - purchase, authorize, capture, refund, webhooks, platform orders - and its Symfony bundle (Omnibus's sibling for trade).",
+    "description": "Omnitrade: one contract for payment providers and commerce platforms - purchase, authorize, capture, refund, webhooks, platform orders - on omnisense/contracts (usage policies, the providers' waits honoured, never a payment retried), under any PHP host; an optional Symfony bundle.",
     "keywords": [
         "payment",
         "gateway",
@@ -20,9 +20,11 @@
     ],
     "require": {
         "php": ">=8.2",
+        "omnisense/contracts": "^1.0@dev",
         "symfony/http-client-contracts": "^3.0"
     },
     "require-dev": {
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^11.0",
         "symfony/config": "^6.4|^7.0|^8.0",
         "symfony/dependency-injection": "^6.4|^7.0|^8.0",

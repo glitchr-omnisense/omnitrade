@@ -2,6 +2,9 @@
 
 namespace Omnitrade;
 
+use Omnisense\Contracts\Policy\DeclaresUsagePolicyInterface;
+use Omnisense\Contracts\Policy\PolicyGuard;
+use Omnisense\Contracts\Policy\UsagePolicy;
 use Omnitrade\Action\ActionInterface;
 use Omnitrade\Exception\ProviderException;
 use Omnitrade\Exception\RequestNotSupportedException;
@@ -18,15 +21,91 @@ use Omnitrade\Model\Subscription;
 use Omnitrade\Model\Transaction;
 use Omnitrade\Request;
 
-/** A provider's actions behind one door: the first action supporting a request answers it. */
-final class Gateway implements GatewayInterface
+/**
+ * A provider's actions behind one door: the first action supporting a request
+ * answers it. The waits the provider asks for (a 429's Retry-After) hold its
+ * calls in every case, in its API client. Guarded (guardedBy(), what
+ * Registry::guarded() gives), every request but a webhook's (Notify) also
+ * goes through the provider's usage policy as the site runs it
+ * (omnisense/contracts' PolicyGuard): a limit reached refuses it before
+ * anything is sent (UsageLimitReachedException), the call is counted after,
+ * answered or failed. Nothing retries a call.
+ */
+final class Gateway implements GatewayInterface, DeclaresUsagePolicyInterface
 {
-    /** @param ActionInterface[] $actions */
+    /** Each request's operation: GatewayInterface's method name, the policy's "operations". */
+    public const OPERATIONS = [
+        Request\Purchase::class => 'purchase',
+        Request\Authorize::class => 'authorize',
+        Request\Capture::class => 'capture',
+        Request\Refund::class => 'refund',
+        Request\VoidAuthorization::class => 'void',
+        Request\FetchTransaction::class => 'fetch',
+        Request\GetPaymentMethods::class => 'paymentMethods',
+        Request\Notify::class => 'notify',
+        Request\FetchOrder::class => 'fetchOrder',
+        Request\FetchProduct::class => 'fetchProduct',
+        Request\FetchProducts::class => 'fetchProducts',
+        Request\FetchInventory::class => 'fetchInventory',
+        Request\AffiliateLink::class => 'affiliateLink',
+        Request\CreateAccount::class => 'createAccount',
+        Request\AccountLink::class => 'accountLink',
+        Request\FetchAccount::class => 'fetchAccount',
+        Request\Subscribe::class => 'subscribe',
+        Request\FetchSubscription::class => 'fetchSubscription',
+        Request\CancelSubscription::class => 'cancelSubscription',
+        Request\SubscriptionPortal::class => 'subscriptionPortal',
+        Request\RegisterWebhook::class => 'registerWebhook',
+        Request\FetchWebhooks::class => 'fetchWebhooks',
+        Request\DeleteWebhook::class => 'deleteWebhook',
+    ];
+
+    private ?Capabilities $capabilities = null;
+
+    /**
+     * @param ActionInterface[] $actions
+     * @param ?UsagePolicy      $policy  the provider's, as it declares it (unknown when not given)
+     * @param ?PolicyGuard      $guard   the policy every request but a webhook's goes through (none: unguarded)
+     */
     public function __construct(
         private readonly string $name,
         private readonly string $title,
         private readonly array $actions,
+        private readonly ?UsagePolicy $policy = null,
+        private readonly ?PolicyGuard $guard = null,
     ) {
+    }
+
+    /** The same gateway, its requests (but a webhook's) through this guard. */
+    public function guardedBy(PolicyGuard $guard): self
+    {
+        return new self($this->name, $this->title, $this->actions, $this->policy, $guard);
+    }
+
+    /** The operation a request is: "purchase", "refund"... (its class's short name, first letter lower, when it is no request of the family's). */
+    public static function operation(Request\Request $request): string
+    {
+        return self::OPERATIONS[$request::class] ?? lcfirst((new \ReflectionClass($request))->getShortName());
+    }
+
+    public function usagePolicy(): UsagePolicy
+    {
+        return $this->policy ?? UsagePolicy::unknown($this->name);
+    }
+
+    public function capabilities(): Capabilities
+    {
+        if (null === $this->capabilities) {
+            $operations = [];
+            foreach (self::OPERATIONS as $request => $operation) {
+                if ($this->supports($request)) {
+                    $operations[] = $operation;
+                }
+            }
+            $this->capabilities = new Capabilities($operations, $this->usagePolicy());
+        }
+
+        return $this->capabilities;
     }
 
     public function getName(): string
@@ -52,6 +131,23 @@ final class Gateway implements GatewayInterface
     }
 
     public function execute(Request\Request $request): Request\Request
+    {
+        // A webhook is a call made to the site: its own calls to the provider wait as the provider asked, in its API client.
+        if (null !== $this->guard && !$request instanceof Request\Notify) {
+            return $this->guard->call(self::operation($request), fn () => $this->answer($request));
+        }
+
+        return $this->answer($request);
+    }
+
+    /**
+     * @template T of Request\Request
+     *
+     * @param T $request
+     *
+     * @return T
+     */
+    private function answer(Request\Request $request): Request\Request
     {
         foreach ($this->actions as $action) {
             if ($action->supports($request)) {

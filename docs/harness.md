@@ -121,8 +121,13 @@ only, and the `harness` volume at `/harness`. At each start the entrypoint runs
 `docker/harness/setup.php`, which writes `/harness/composer.json` and `/harness/phpunit.xml`: the
 core as a path repository, each provider from its checkout under `/omnitrade/plugins/<slug>` when
 there is one, else from `https://github.com/glitchr-omnisense/omnitrade-<slug>.git` (branch `1.x`),
-plus `symfony/console`, `symfony/http-client`, `symfony/var-dumper` and, for the tests, PHPUnit and
-the bundle's Symfony components. It runs `composer install` the first time and `composer update`
+plus `symfony/console`, `symfony/http-client`, `symfony/var-dumper` and, for the tests, PHPUnit,
+PHPStan and the bundle's Symfony components. omnisense/contracts comes from its checkout when
+`OMNISENSE_CONTRACTS` in `.env` names one (mounted at `/omnisense/contracts`, its tests run with
+the family's), else from GitHub. `/harness/packages/<slug>` links to each package, and
+`docker compose run --rm omnitrade phpstan` runs PHPStan at level max on every package with a
+`phpstan.neon`. Each package's `phpstan-baseline.neon` holds what was there when PHPStan came in, and
+it may only shrink. It runs `composer install` the first time and `composer update`
 when that file changed, then the command. The first run needs the network; the volume keeps
 the packages and Composer's cache between runs.
 

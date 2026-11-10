@@ -2,13 +2,35 @@
 
 ## Unreleased (1.x)
 
-### Documentation
-
-- `docs/usage-webhooks.md`: webhooks are optional - a scheduled read catches up everything they
-  say, and a development machine needs neither a tunnel nor a webhook registered (never a
-  `localhost` URL at the provider).
+### Changed
+- On omnisense/contracts, the kernel of the omni families (required, `^1.0@dev`), the public API
+  unchanged: `Config`, `Registry`, `GatewayFactory` and `Http\Redaction` are thin subclasses of the
+  kernel's (prefix `omnitrade`, omnitrade's messages and exceptions); `GatewayInterface` extends
+  its `ProviderInterface` (one method more, `capabilities()`: no class outside `Gateway` implements
+  it), `GatewayFactoryInterface` its `ProviderFactoryInterface`; `OmnitradeException` extends its
+  `ExceptionInterface`, `InvalidConfigException` its `InvalidConfigException` (an
+  `\InvalidArgumentException`, so a `\LogicException` as before).
+- The Symfony bundle is the only class needing a framework: `symfony/http-kernel`,
+  `dependency-injection` and `config` stay suggested (require-dev), the bundle's file throws a
+  `\LogicException` naming them when they are missing, and it is marked `@suggested` so the
+  kernel's bare check leaves it out (`Tests/LoadAllTest.php`: every other class loads with
+  omnisense/contracts and the HTTP client contracts alone).
 
 ### Added
+- Usage policies: a provider declares its policy (`omnitrade.policy`: its `policy.json`), a gateway
+  gives it (`DeclaresUsagePolicyInterface`) with its operations (`capabilities()`, `Capabilities`,
+  `Gateway::OPERATIONS`); `Registry::policy()`, `policies()`, `guard()` and `guarded()` (the gateway
+  behind its guard: a limit reached refuses a request before it is sent, webhooks never); a gateway's
+  `policy` and `usage` beside its options; a shared limiter as the registry's third argument. The
+  bundle takes `policy`, `usage` and `limiter`.
+- `Http\Throttle`: a provider's API client honours the waits the provider asks for (the gateway's
+  Backoff, `Config::backoff()`): no call while one lasts (`Exception\UsageLimitReachedException`), a
+  429 a `Exception\RateLimitedException` (a `ProviderException`, `retryAfter`) - never retried.
+- `Testing\BareTestCase`, the kernel's bare check for an omnitrade package.
+- The harness installs omnisense/contracts from its checkout (`OMNISENSE_CONTRACTS`) or GitHub and runs
+  its tests; `phpstan` runs PHPStan at level max on every package (`phpstan.neon`, a baseline that
+  may only shrink).
+- `docs/policies.md`; `errors.md`, `symfony.md`, `harness.md`, `README.md`.
 - The `tags` option, every provider's: labels (`site: solstay`) put on everything a gateway
   creates at the provider, under the call's own metadata, which wins on a key both have but
   `site`, the configuration's (`Model\Tags`: `fromOption()`, `merge()`, `site()`). The factory
@@ -29,7 +51,13 @@
   previous a copy of the client's exception, the same class and code (`copy()`), and no trace
   of the chain keeping its arguments (`withoutArguments()`).
 
+### Documentation
+- `docs/usage-webhooks.md`: webhooks are optional - a scheduled read catches up everything they
+  say, and a development machine needs neither a tunnel nor a webhook registered (never a
+  `localhost` URL at the provider).
+
 ### Fixed
 - `GatewayFactory::create()` throws what fails without arguments in its trace: with
   `zend.exception_ignore_args` off, an `InvalidConfigException` (a missing option) kept the
   options given, credentials included, in the arguments of `create()`.
+

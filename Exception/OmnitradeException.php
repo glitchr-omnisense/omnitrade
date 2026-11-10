@@ -2,7 +2,9 @@
 
 namespace Omnitrade\Exception;
 
-/** Every exception Omnitrade throws. */
-interface OmnitradeException extends \Throwable
+use Omnisense\Contracts\Exception\ExceptionInterface;
+
+/** Every exception Omnitrade throws; omnisense/contracts' ExceptionInterface catches them too. */
+interface OmnitradeException extends ExceptionInterface
 {
 }

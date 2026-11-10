@@ -34,7 +34,12 @@ This package holds the contract (`GatewayInterface`, `GatewayFactory`, `Registry
 (`Payment`, `Money`, `Transaction`, `Refund`, `PaymentMethod`, `Notification`, `PlatformOrder`,
 `Product`, `ProductVariant`, `Offer`, `Stock`...),
 the requests and a bridge for Symfony. It needs no framework: it requires nothing but
-`symfony/http-client-contracts`, each provider package `symfony/http-client`. Each provider is a
+[omnisense/contracts](https://github.com/glitchr-omnisense/contracts) (the kernel of the omni
+families: the registry, usage policies, the waits a provider asks for) and
+`symfony/http-client-contracts`, each provider package `symfony/http-client`. The Symfony bundle's
+components are suggested, not required. Each provider declares its usage policy as data
+(`policy.json`). A 429 is surfaced and never retried: a payment is never sent twice
+([docs/policies.md](docs/policies.md)). Each provider is a
 package of its own:
 
 | Package | Provider |
@@ -137,6 +142,8 @@ The manual, in `docs/` (read in that order, as one page, on the Omnisense site):
 - [The catalogue and affiliate links](docs/catalogue.md)
 - [Connected accounts](docs/connect.md)
 - [Subscriptions](docs/subscriptions.md)
+- [Several sites in one sandbox](docs/several-sites.md): a key, a webhook and a `site` tag per site
+- [Usage policies and rate limits](docs/policies.md): the guard, a 429, idempotency keys
 - [Configuration reference](docs/configuration.md): every provider's options
 - [Errors](docs/errors.md)
 - [Testing](docs/testing.md): an application's tests, the conformance suite

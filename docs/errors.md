@@ -5,15 +5,17 @@ order: 50
 
 # Errors
 
-Every exception Omnitrade throws implements `Omnitrade\Exception\OmnitradeException` (an interface
-extending `\Throwable`):
+Every exception Omnitrade throws implements `Omnitrade\Exception\OmnitradeException`, an interface
+extending omnisense/contracts' `ExceptionInterface` (a `\Throwable`):
 
 | Exception | Extends | When |
 |---|---|---|
-| `InvalidConfigException` | `\LogicException` | a gateway not configured, a factory not installed, a required option missing or empty, an API client of the wrong class, Amazon's unknown `credential_version` |
+| `InvalidConfigException` | omnisense/contracts' `InvalidConfigException` (`\InvalidArgumentException`, a `\LogicException`) | a gateway not configured, a factory not installed, a required option missing or empty, an API client of the wrong class, Amazon's unknown `credential_version` |
 | `RequestNotSupportedException` | `\LogicException` | the provider does not do that (no authorizations at Shopify): `supports()` says so beforehand; thrown before any call |
 | `ProviderException` | `\RuntimeException` | the provider refused, or could not be reached: any HTTP error status, a transport failure, an answer that cannot be read, a request the provider package refuses before calling (a Checkout session without `returnUrl`) |
 | `InvalidNotificationException` | `ProviderException` | a webhook whose signature does not hold, that is unsigned or too old, or that cannot be checked for want of a secret |
+| `RateLimitedException` | `ProviderException` | the provider answered 429 (`retryAfter`: the seconds it asked to wait, when it said); not retried ([Usage policies](policies.md)) |
+| `UsageLimitReachedException` | omnisense/contracts' `UsageLimitReached` (`\RuntimeException`) | a call refused before it was sent: a limit of the provider's policy is reached on a guarded gateway, or the provider's wait is not over (`retryAfter`) |
 
 The first two are mistakes of the application (`\LogicException`): fix the configuration or ask
 `supports()` first. The last two happen at run time: catch them where the application talks to

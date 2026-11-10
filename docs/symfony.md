@@ -38,9 +38,8 @@ STRIPE_API_KEY=...
 STRIPE_WEBHOOK_SECRET=...
 ```
 
-The whole tree, as the bundle's configuration dumps it (`YamlReferenceDumper` on the bundle's
-extension, run in the harness image on 2026-10-25; `bin/console config:dump-reference omnitrade`
-prints the same in an application):
+The whole tree, as the bundle defines it (written from its `configure()` on 2026-11-10;
+`bin/console config:dump-reference omnitrade` prints it in an application):
 
 ```yaml
 omnitrade:
@@ -52,13 +51,31 @@ omnitrade:
         name:
             factory:              ~ # Required
             options:              []
+
+            # A tightening of the provider's usage policy, in omnisense/contracts' schema (never looser).
+            policy:               ~
+
+            # What the site is: {commercial: true, open_source: false, contract: false}.
+            usage:                ~
+
+    # A service implementing Omnisense\Contracts\Policy\RateLimiterInterface, shared by the processes; null: in memory.
+    limiter:              null
 ```
 
 | Key | Type | Default | |
 |---|---|---|---|
 | `omnitrade.gateways` | map, keyed by the gateway's name | `{}` | the shop's providers |
 | `omnitrade.gateways.<name>.factory` | string, required, not empty | - | a factory's name: `stripe`, `paypal`, `shopify`, `woocommerce`, `web`, `amazon`, or an application's own factory's `getName()` |
-| `omnitrade.gateways.<name>.options` | any value (a map) | `[]` | handed as they are to the factory's `create()`: the provider's options ([Configuration](configuration.md)) |
+| `omnitrade.gateways.<name>.options` | any value (a map) | `[]` | handed as they are to the factory's `create()`: the provider's options ([Configuration](configuration.md)), `tags` among them ([Several sites in one sandbox](several-sites.md)) |
+| `omnitrade.gateways.<name>.policy` | a map, the policy schema's shape | none | the site's tightening of the provider's usage policy ([Usage policies](policies.md)) |
+| `omnitrade.gateways.<name>.usage` | a map | none | what the site is: `commercial`, `open_source`, `contract` |
+| `omnitrade.limiter` | a service id | `null` | where every process counts the calls and keeps the waits a provider asked for (a `RateLimiterInterface`); in memory otherwise |
+
+The bundle is optional: `symfony/http-kernel`, `symfony/dependency-injection` and `symfony/config`
+are suggested by omnisense/omnitrade, not required. Without them, loading the bundle's class
+throws a `\LogicException` naming them. Nothing else in the package needs a framework (the core's
+`Tests/LoadAllTest.php` loads every other class with omnisense/contracts and the HTTP client
+contracts alone).
 
 The options are not validated when the container compiles - the tree accepts any value - but
 when the gateway is built: a required option missing or empty is an `InvalidConfigException`

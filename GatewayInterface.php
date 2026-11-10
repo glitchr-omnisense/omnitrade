@@ -2,6 +2,7 @@
 
 namespace Omnitrade;
 
+use Omnisense\Contracts\Provider\ProviderInterface;
 use Omnitrade\Model\Account;
 use Omnitrade\Model\Money;
 use Omnitrade\Model\Notification;
@@ -24,8 +25,11 @@ use Omnitrade\Request\Request;
  * typed method is a shortcut for execute() with its request; a provider that
  * does not do something throws RequestNotSupportedException, and supports()
  * says so beforehand.
+ *
+ * It is an omnisense/contracts provider: capabilities() lists the operations
+ * it supports and its usage policy (Capabilities).
  */
-interface GatewayInterface
+interface GatewayInterface extends ProviderInterface
 {
     public function getName(): string;
 
@@ -33,6 +37,9 @@ interface GatewayInterface
 
     /** @param class-string<Request> $request */
     public function supports(string $request): bool;
+
+    /** The operations it supports, and the provider's usage policy. */
+    public function capabilities(): Capabilities;
 
     /**
      * @template T of Request
