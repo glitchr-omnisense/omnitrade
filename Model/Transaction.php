@@ -25,6 +25,7 @@ final readonly class Transaction
         /** @var array<string, mixed> */
         public array $metadata = [],
         public ?\DateTimeImmutable $createdAt = null,
+        /** @var array<mixed> the provider's answer, whole */
         public array $raw = [],
     ) {
     }

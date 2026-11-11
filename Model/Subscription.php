@@ -37,6 +37,7 @@ final readonly class Subscription
         public ?string $price = null,
         /** @var array<string, mixed> yours, given at Subscribe */
         public array $metadata = [],
+        /** @var array<mixed> the provider's answer, whole */
         public array $raw = [],
     ) {
     }

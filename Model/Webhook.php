@@ -17,6 +17,7 @@ final readonly class Webhook
         public array $events = [],
         /** The signing secret: set in the answer to RegisterWebhook only. */
         #[\SensitiveParameter] public ?string $secret = null,
+        /** @var array<mixed> the provider's answer, whole */
         public array $raw = [],
     ) {
     }

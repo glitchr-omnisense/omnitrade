@@ -12,6 +12,8 @@ use Omnitrade\Model\Webhook;
  * it: the provider's former webhook on that address is deleted, a new one
  * made, its secret new. $events empty: the events the provider's gateway
  * reads. Result: the Webhook, with its secret.
+ *
+ * @extends Request<Webhook>
  */
 final class RegisterWebhook extends Request
 {

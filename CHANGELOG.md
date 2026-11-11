@@ -3,6 +3,9 @@
 ## Unreleased (1.x)
 
 ### Changed
+- PHPStan at level max with an empty baseline: `Request\Request` is generic (`@template TResult`,
+  each request `@extends Request<...>` with what its action answers, so a provider's `setResult()`
+  is checked); the models' `$raw` are `array<mixed>`. Types only, in PHPDoc: no signature changed.
 - On omnisense/contracts, the kernel of the omni families (required, `^1.0@dev`), the public API
   unchanged: `Config`, `Registry`, `GatewayFactory` and `Http\Redaction` are thin subclasses of the
   kernel's (prefix `omnitrade`, omnitrade's messages and exceptions); `GatewayInterface` extends

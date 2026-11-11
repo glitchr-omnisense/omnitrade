@@ -8,6 +8,8 @@ use Omnitrade\Model\Notification;
  * What the provider sent to the webhook: the raw body and the request's
  * headers, for the signature. Result: the Notification, or
  * InvalidNotificationException when the signature does not hold.
+ *
+ * @extends Request<Notification>
  */
 final class Notify extends Request
 {

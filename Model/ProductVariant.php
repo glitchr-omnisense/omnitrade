@@ -21,6 +21,7 @@ final readonly class ProductVariant
         public array $attributes = [],
         /** Grams. */
         public ?int $weight = null,
+        /** @var array<mixed> the provider's answer, whole */
         public array $raw = [],
     ) {
     }

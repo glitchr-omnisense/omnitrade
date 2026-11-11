@@ -163,34 +163,53 @@ final class Gateway implements GatewayInterface, DeclaresUsagePolicyInterface
         throw RequestNotSupportedException::for($request, $this->name);
     }
 
+    /**
+     * The result of a request that must have one: an action that answered null breaks its
+     * contract, a TypeError as the method's return type made it.
+     *
+     * @template T
+     *
+     * @param T|null $result
+     *
+     * @return T
+     */
+    private static function answered(mixed $result, string $method): mixed
+    {
+        if (null === $result) {
+            throw new \TypeError(\sprintf('%s::%s(): Return value must not be null, the action answered null.', self::class, $method));
+        }
+
+        return $result;
+    }
+
     public function purchase(Payment $payment): Transaction
     {
-        return $this->execute(new Request\Purchase($payment))->getTransaction();
+        return self::answered($this->execute(new Request\Purchase($payment))->getTransaction(), __FUNCTION__);
     }
 
     public function authorize(Payment $payment): Transaction
     {
-        return $this->execute(new Request\Authorize($payment))->getTransaction();
+        return self::answered($this->execute(new Request\Authorize($payment))->getTransaction(), __FUNCTION__);
     }
 
     public function capture(string $reference, ?Money $amount = null, ?string $idempotencyKey = null): Transaction
     {
-        return $this->execute(new Request\Capture($reference, $amount, $idempotencyKey))->getTransaction();
+        return self::answered($this->execute(new Request\Capture($reference, $amount, $idempotencyKey))->getTransaction(), __FUNCTION__);
     }
 
     public function refund(string $reference, ?Money $amount = null, ?string $idempotencyKey = null, ?string $reason = null): RefundModel
     {
-        return $this->execute(new Request\Refund($reference, $amount, $idempotencyKey, $reason))->getRefund();
+        return self::answered($this->execute(new Request\Refund($reference, $amount, $idempotencyKey, $reason))->getRefund(), __FUNCTION__);
     }
 
     public function void(string $reference): Transaction
     {
-        return $this->execute(new Request\VoidAuthorization($reference))->getTransaction();
+        return self::answered($this->execute(new Request\VoidAuthorization($reference))->getTransaction(), __FUNCTION__);
     }
 
     public function fetch(string $reference): Transaction
     {
-        return $this->execute(new Request\FetchTransaction($reference))->getTransaction();
+        return self::answered($this->execute(new Request\FetchTransaction($reference))->getTransaction(), __FUNCTION__);
     }
 
     public function paymentMethods(?Money $for = null, ?string $country = null): array
@@ -200,12 +219,12 @@ final class Gateway implements GatewayInterface, DeclaresUsagePolicyInterface
 
     public function notify(string $body, array $headers = []): Notification
     {
-        return $this->execute(new Request\Notify($body, $headers))->getNotification();
+        return self::answered($this->execute(new Request\Notify($body, $headers))->getNotification(), __FUNCTION__);
     }
 
     public function fetchOrder(string $reference): PlatformOrder
     {
-        return $this->execute(new Request\FetchOrder($reference))->getOrder();
+        return self::answered($this->execute(new Request\FetchOrder($reference))->getOrder(), __FUNCTION__);
     }
 
     public function fetchProduct(Reference|string $reference): ?Product
@@ -230,36 +249,36 @@ final class Gateway implements GatewayInterface, DeclaresUsagePolicyInterface
 
     public function createAccount(string $country, ?string $email = null, string $type = Account::EXPRESS, array $metadata = []): Account
     {
-        return $this->execute(new Request\CreateAccount($country, $email, $type, null, $metadata))->getAccount();
+        return self::answered($this->execute(new Request\CreateAccount($country, $email, $type, null, $metadata))->getAccount(), __FUNCTION__);
     }
 
     public function accountLink(string $reference, string $returnUrl, string $refreshUrl): string
     {
-        return $this->execute(new Request\AccountLink($reference, $returnUrl, $refreshUrl))->getUrl();
+        return self::answered($this->execute(new Request\AccountLink($reference, $returnUrl, $refreshUrl))->getUrl(), __FUNCTION__);
     }
 
     public function fetchAccount(string $reference): Account
     {
-        return $this->execute(new Request\FetchAccount($reference))->getAccount();
+        return self::answered($this->execute(new Request\FetchAccount($reference))->getAccount(), __FUNCTION__);
     }
 
     public function subscribe(Payment $payment, string $interval = 'month', int $intervalCount = 1, ?string $price = null): Transaction
     {
-        return $this->execute(new Request\Subscribe($payment, $interval, $intervalCount, $price))->getTransaction();
+        return self::answered($this->execute(new Request\Subscribe($payment, $interval, $intervalCount, $price))->getTransaction(), __FUNCTION__);
     }
 
     public function fetchSubscription(string $reference): Subscription
     {
-        return $this->execute(new Request\FetchSubscription($reference))->getSubscription();
+        return self::answered($this->execute(new Request\FetchSubscription($reference))->getSubscription(), __FUNCTION__);
     }
 
     public function cancelSubscription(string $reference, bool $atPeriodEnd = true): Subscription
     {
-        return $this->execute(new Request\CancelSubscription($reference, $atPeriodEnd))->getSubscription();
+        return self::answered($this->execute(new Request\CancelSubscription($reference, $atPeriodEnd))->getSubscription(), __FUNCTION__);
     }
 
     public function subscriptionPortal(string $customer, string $returnUrl, ?string $locale = null): string
     {
-        return $this->execute(new Request\SubscriptionPortal($customer, $returnUrl, $locale))->getUrl();
+        return self::answered($this->execute(new Request\SubscriptionPortal($customer, $returnUrl, $locale))->getUrl(), __FUNCTION__);
     }
 }

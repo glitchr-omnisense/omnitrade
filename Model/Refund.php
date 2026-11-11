@@ -14,6 +14,7 @@ final readonly class Refund
         /** The transaction refunded. */
         public ?string $transactionReference = null,
         public ?string $message = null,
+        /** @var array<mixed> the provider's answer, whole */
         public array $raw = [],
     ) {
     }

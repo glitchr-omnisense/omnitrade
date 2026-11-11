@@ -20,6 +20,7 @@ final readonly class PlatformOrder
         public ?string $financialStatus = null,
         public ?string $fulfillmentStatus = null,
         public ?\DateTimeImmutable $createdAt = null,
+        /** @var array<mixed> the provider's answer, whole */
         public array $raw = [],
     ) {
     }

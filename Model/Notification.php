@@ -29,6 +29,7 @@ final readonly class Notification
         public ?Transaction $transaction = null,
         /** The provider's id for the event, to handle it once. */
         public ?string $id = null,
+        /** @var array<mixed> the provider's answer, whole */
         public array $raw = [],
         public ?Product $product = null,
         /** @var list<Stock> */

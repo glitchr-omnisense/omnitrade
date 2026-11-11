@@ -59,9 +59,10 @@ final class CatalogueTest extends TestCase
         self::assertCount(1, $searched->products);
 
         $byUrl = $gateway->fetchProduct('https://cave.example/products/margaux');
+        self::assertNotNull($byUrl);
         self::assertSame('p1', $byUrl->reference);
-        self::assertSame(2400, $byUrl->price()->amount);
-        self::assertSame('2018', $byUrl->variant('v2')->options['Millésime']);
+        self::assertSame(2400, $byUrl->price()?->amount);
+        self::assertSame('2018', $byUrl->variant('v2')?->options['Millésime']);
         self::assertNull($gateway->fetchProduct('nothing'));
 
         $stocks = $gateway->fetchInventory(['v1']);

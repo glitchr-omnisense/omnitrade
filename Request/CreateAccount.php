@@ -9,6 +9,8 @@ use Omnitrade\Model\Account;
  * seller, the host of a fund): an Express account by default - the provider
  * holds its dashboard and its identity checks. Result: the Account, not
  * ready yet; AccountLink gives the page where its holder completes it.
+ *
+ * @extends Request<Account>
  */
 final class CreateAccount extends Request
 {

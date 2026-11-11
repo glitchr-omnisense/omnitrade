@@ -22,7 +22,7 @@ final class StubFactory extends GatewayFactory
             'omnitrade.factory_name' => 'stub',
             'omnitrade.factory_title' => 'Stub',
             'omnitrade.required_options' => ['token'],
-            'omnitrade.api' => static fn (Config $c) => new StubApi($c['token']),
+            'omnitrade.api' => static fn (Config $c) => new StubApi((string) $c->string('token')),
             'omnitrade.action.purchase' => new StubPurchaseAction(),
             'omnitrade.action.fetch' => static fn (Config $c) => new StubFetchAction(),
         ]);

@@ -7,6 +7,8 @@ use Omnitrade\Model\Stock;
 /**
  * What is left of these variants (their ids at the platform; none: every
  * variant it tracks). Result: Stock[], one per variant answered.
+ *
+ * @extends Request<list<Stock>>
  */
 final class FetchInventory extends Request
 {

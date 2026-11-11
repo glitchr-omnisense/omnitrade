@@ -31,6 +31,7 @@ final readonly class Account
         public ?string $defaultCurrency = null,
         /** @var array<string, mixed> */
         public array $metadata = [],
+        /** @var array<mixed> the provider's answer, whole */
         public array $raw = [],
     ) {
     }

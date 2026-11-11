@@ -69,7 +69,7 @@ final readonly class Payment
                 return false;
             }
         }
-        $sum = ($this->shipping?->amount ?? 0) - ($this->discount?->amount ?? 0);
+        $sum = ($this->shipping->amount ?? 0) - ($this->discount->amount ?? 0);
         foreach ($this->lines as $line) {
             if ($line->unitAmount->currency !== $currency) {
                 return false;

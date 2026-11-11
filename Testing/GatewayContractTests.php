@@ -88,12 +88,22 @@ trait GatewayContractTests
         return [];
     }
 
-    /** The options that must be given; by default what a GatewayFactory's Config requires. */
+    /**
+     * The options that must be given; by default what a GatewayFactory's Config requires.
+     *
+     * @return list<string>
+     */
     protected function requiredOptions(): array
     {
         $factory = $this->factory(new MockHttpClient());
+        if (!$factory instanceof GatewayFactory) {
+            return [];
+        }
+        $required = (array) $factory->createConfig()->get('omnitrade.required_options', []);
+        $names = array_values(array_filter($required, '\\is_string'));
+        self::assertCount(\count($required), $names, 'the required options are named');
 
-        return $factory instanceof GatewayFactory ? (array) $factory->createConfig()->get('omnitrade.required_options', []) : [];
+        return $names;
     }
 
     /** The payment purchase(), authorize() and subscribe() are asked with. */
@@ -409,7 +419,8 @@ trait GatewayContractTests
         if ($gateway->supports(Request\FetchProducts::class)) {
             $supported = true;
             $page = $this->answered(fn () => $gateway->fetchProducts(null, null, $this->catalogueQuery(), 10), 'fetchProducts');
-            self::assertIsList($page->products);
+            $keys = array_keys($page->products);
+            self::assertSame($keys ? range(0, \count($keys) - 1) : [], $keys, 'fetchProducts(): the products are a list');
             self::assertNotSame([], $page->products, 'fetchProducts(): the recorded answers give a page with products');
             foreach ($page->products as $product) {
                 $this->assertProduct($product, $gateway, 'fetchProducts');

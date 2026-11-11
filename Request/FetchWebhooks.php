@@ -4,7 +4,11 @@ namespace Omnitrade\Request;
 
 use Omnitrade\Model\Webhook;
 
-/** The webhooks registered at the provider, without their secrets. Result: list<Webhook>. */
+/**
+ * The webhooks registered at the provider, without their secrets. Result: list<Webhook>.
+ *
+ * @extends Request<list<Webhook>>
+ */
 final class FetchWebhooks extends Request
 {
     /** @return list<Webhook> */

@@ -20,7 +20,9 @@ final class OmnitradeBundleTest extends TestCase
         $container->register(StubFactory::class)->setAutoconfigured(true);
         $container->register(Shop::class)->setAutowired(true)->setPublic(true);
         $bundle = new OmnitradeBundle();
-        $container->registerExtension($bundle->getContainerExtension());
+        $extension = $bundle->getContainerExtension();
+        self::assertNotNull($extension);
+        $container->registerExtension($extension);
         $container->loadFromExtension('omnitrade', ['gateways' => [
             'card' => ['factory' => 'stub', 'options' => ['token' => 'c']],
             'wallet' => ['factory' => 'stub', 'options' => ['token' => 'w']],
@@ -28,9 +30,11 @@ final class OmnitradeBundleTest extends TestCase
         $container->compile();
 
         $registry = $container->get(Registry::class);
+        self::assertInstanceOf(Registry::class, $registry);
         self::assertSame(['card', 'wallet'], array_keys($registry->all()));
 
         $shop = $container->get(Shop::class);
+        self::assertInstanceOf(Shop::class, $shop);
         self::assertSame('tx_c_1', $shop->card->purchase(\Omnitrade\Tests\Fixtures::payment())->reference, 'injected by its name');
         self::assertSame('stub', $shop->wallet->getName());
     }

@@ -10,6 +10,8 @@ use Omnitrade\Model\Reference;
  * Associates tag, omnitrade/web with the query parameters configured per
  * host. Result: the URL, or null when the provider has no programme for
  * that product (use the plain address).
+ *
+ * @extends Request<?string>
  */
 final class AffiliateLink extends Request
 {

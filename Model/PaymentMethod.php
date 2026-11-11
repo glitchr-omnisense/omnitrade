@@ -19,6 +19,7 @@ final readonly class PaymentMethod
         public string $kind = self::OTHER,
         /** @var list<string> the currencies it takes, empty for any */
         public array $currencies = [],
+        /** @var array<mixed> the provider's answer, whole */
         public array $raw = [],
     ) {
     }

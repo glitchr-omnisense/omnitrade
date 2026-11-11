@@ -44,6 +44,7 @@ final readonly class Product
         /** Who sells it, when it is not the shop itself. */
         public ?Merchant $merchant = null,
         public ?\DateTimeImmutable $updatedAt = null,
+        /** @var array<mixed> the provider's answer, whole */
         public array $raw = [],
     ) {
     }

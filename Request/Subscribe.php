@@ -14,6 +14,8 @@ use Omnitrade\Model\Transaction;
  * The payment's lines describe what is subscribed to; a provider that
  * keeps its own prices takes $price (a Stripe "price_...") instead of the
  * amount.
+ *
+ * @extends Request<Transaction>
  */
 final class Subscribe extends Request
 {

@@ -8,6 +8,8 @@ namespace Omnitrade\Request;
  * its URL. $returnUrl is where they come back when done or tired (ask
  * FetchAccount what is still missing), $refreshUrl where they land when the
  * link ran out: make a new one there.
+ *
+ * @extends Request<string>
  */
 final class AccountLink extends Request
 {

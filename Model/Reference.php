@@ -54,6 +54,6 @@ final readonly class Reference
 
     public function __toString(): string
     {
-        return $this->id ?? $this->url;
+        return $this->id ?? (string) $this->url; // the constructor makes sure one of them is given
     }
 }

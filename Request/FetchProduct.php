@@ -8,6 +8,8 @@ use Omnitrade\Model\Reference;
 /**
  * One product, by the platform's id or the address of its page. Result: the
  * Product, or null when there is no such product.
+ *
+ * @extends Request<?Product>
  */
 final class FetchProduct extends Request
 {

@@ -82,7 +82,7 @@ final class OmnitradeBundle extends AbstractBundle
 
         $services = $container->services();
         foreach (self::FACTORIES as $factory) {
-            if (class_exists($factory) && is_subclass_of($factory, GatewayFactoryInterface::class)) {
+            if (class_exists($factory)) {
                 $services->set($factory)->args([service('http_client')->nullOnInvalid()])->tag('omnitrade.gateway_factory');
             }
         }

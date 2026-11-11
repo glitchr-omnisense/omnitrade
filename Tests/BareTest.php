@@ -27,12 +27,15 @@ final class BareTest extends TestCase
         [$status, $report] = self::php([__DIR__.'/../docker/harness/bin/bare', '--recorded', '--json']);
 
         self::assertSame(0, $status);
-        self::assertContains(Registry::class, $report['symbols'], 'the registry was built there');
+        self::assertContains(Registry::class, self::names($report, 'symbols'), 'the registry was built there');
         self::assertSame([], self::framework($report), 'no class nor file of a framework');
-        $installed = array_values(array_filter(array_column(require __DIR__.'/../docker/harness/plugins.php', 1), 'class_exists'));
+        $plugins = require __DIR__.'/../docker/harness/plugins.php';
+        self::assertIsArray($plugins);
+        $installed = array_values(array_filter(self::names(array_column($plugins, 1)), static fn (string $factory): bool => class_exists($factory)));
         foreach ($installed as $factory) {
-            self::assertContains($factory, $report['symbols'], 'every provider package installed, its factory built');
+            self::assertContains($factory, self::names($report, 'symbols'), 'every provider package installed, its factory built');
         }
+        self::assertIsArray($report['factories'] ?? null);
         self::assertCount(\count($installed), $report['factories']);
     }
 
@@ -44,7 +47,7 @@ final class BareTest extends TestCase
         [$status, $report] = self::php([__DIR__.'/../docker/harness/bin/bare', '--recorded', '--json']);
 
         self::assertSame(0, $status);
-        self::assertSame(['product', 'affiliate'], $report['gateways']['web']);
+        self::assertSame(['product', 'affiliate'], self::at($report, 'gateways', 'web'));
         self::assertSame([
             'page' => 'https://boutique.example/p/poussette-yoyo',
             'reference' => 'https://boutique.example/p/poussette-yoyo',
@@ -56,7 +59,7 @@ final class BareTest extends TestCase
             'barcode' => '8716134000123',
             'media' => 2,
             'read_from' => 'json-ld',
-        ], $report['product']);
+        ], $report['product'] ?? null);
         self::assertSame([], self::framework($report), 'no class nor file of a framework');
     }
 
@@ -68,10 +71,10 @@ final class BareTest extends TestCase
         [$status, $report] = self::php([__DIR__.'/../docker/harness/bin/bare', '--recorded', '--json']);
 
         self::assertSame(0, $status);
-        self::assertTrue($report['recorded']);
-        self::assertSame(['purchase', 'authorize', 'capture', 'refund', 'fetch', 'methods', 'notify'], $report['gateways']['paypal']);
-        self::assertSame(['provider' => 'paypal', 'reference' => '5O190127TN364715T', 'status' => 'pending', 'redirect' => 'https://www.sandbox.paypal.com/checkoutnow?token=5O190127TN364715T', 'is_redirect' => true], $report['payment']);
-        self::assertContains('Symfony\\Component\\HttpClient\\MockHttpClient', $report['symbols'], 'the answers came through the HTTP client given');
+        self::assertTrue($report['recorded'] ?? null);
+        self::assertSame(['purchase', 'authorize', 'capture', 'refund', 'fetch', 'methods', 'notify'], self::at($report, 'gateways', 'paypal'));
+        self::assertSame(['provider' => 'paypal', 'reference' => '5O190127TN364715T', 'status' => 'pending', 'redirect' => 'https://www.sandbox.paypal.com/checkoutnow?token=5O190127TN364715T', 'is_redirect' => true], $report['payment'] ?? null);
+        self::assertContains('Symfony\\Component\\HttpClient\\MockHttpClient', self::names($report, 'symbols'), 'the answers came through the HTTP client given');
         self::assertSame([], self::framework($report), 'no class nor file of a framework');
     }
 
@@ -90,13 +93,56 @@ final class BareTest extends TestCase
     }
 
     /**
-     * @param array{symbols: list<string>, files: list<string>} $report
+     * @param array<mixed> $report
      *
      * @return list<string> the classes, interfaces, traits and files of a framework among those loaded
      */
     private static function framework(array $report): array
     {
-        return [...array_values(preg_grep(self::FRAMEWORK, $report['symbols'])), ...array_values(preg_grep(self::FRAMEWORK_FILES, $report['files']))];
+        $framework = [];
+        foreach (['symbols' => self::FRAMEWORK, 'files' => self::FRAMEWORK_FILES] as $key => $pattern) {
+            foreach (self::names($report, $key) as $name) {
+                if (preg_match($pattern, $name)) {
+                    $framework[] = $name;
+                }
+            }
+        }
+
+        return $framework;
+    }
+
+    /**
+     * The report's value at this path of keys, each step an array.
+     *
+     * @param array<mixed> $report
+     */
+    private static function at(array $report, string ...$keys): mixed
+    {
+        $value = $report;
+        foreach ($keys as $key) {
+            self::assertIsArray($value);
+            self::assertArrayHasKey($key, $value);
+            $value = $value[$key];
+        }
+
+        return $value;
+    }
+
+    /**
+     * A list of names: the array given, or the report's at this path; every item a string.
+     *
+     * @param array<mixed> $value
+     *
+     * @return list<string>
+     */
+    private static function names(array $value, string ...$keys): array
+    {
+        $value = self::at($value, ...$keys);
+        self::assertIsArray($value);
+        $names = array_values(array_filter($value, '\\is_string'));
+        self::assertCount(\count($value), $names, 'only names');
+
+        return $names;
     }
 
     /**
@@ -104,7 +150,7 @@ final class BareTest extends TestCase
      *
      * @param list<string> $arguments
      *
-     * @return array{int, array<string, mixed>} the exit status, the JSON printed
+     * @return array{int, array<mixed>} the exit status, the JSON printed
      */
     private static function php(array $arguments): array
     {
