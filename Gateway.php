@@ -58,6 +58,9 @@ final class Gateway implements GatewayInterface, DeclaresUsagePolicyInterface
         Request\RegisterWebhook::class => 'registerWebhook',
         Request\FetchWebhooks::class => 'fetchWebhooks',
         Request\DeleteWebhook::class => 'deleteWebhook',
+        Request\SetupMethod::class => 'setupMethod',
+        Request\FetchSavedMethods::class => 'fetchSavedMethods',
+        Request\RemoveSavedMethod::class => 'removeSavedMethod',
     ];
 
     private ?Capabilities $capabilities = null;

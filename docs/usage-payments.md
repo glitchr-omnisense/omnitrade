@@ -202,3 +202,43 @@ and keep it with the attempt.
 | Stripe | `Idempotency-Key` on the session's creation and on the refund |
 | PayPal | `PayPal-Request-Id`: `<reference>-<key>` (purchase, authorize), `<order>-capture-<key>`, `<order>-authorize`, `<capture>-refund-<key>`; the purchase's `invoice_id` is `<reference>-<key>` too |
 | Shopify, WooCommerce | not sent |
+
+## Saved methods, charged without a page (1.1)
+
+A buyer who comes back often saves a method once, on the provider's page, and is charged later
+with no page at all. The site keeps the provider's references - its customer, the method - and
+never a card number.
+
+```php
+use Omnitrade\Model\Customer;
+use Omnitrade\Model\Money;
+use Omnitrade\Model\Payment;
+use Omnitrade\Request\FetchSavedMethods;
+use Omnitrade\Request\RemoveSavedMethod;
+use Omnitrade\Request\SetupMethod;
+
+// 1. Saved on the provider's page; keep $setup->customer with the buyer's account.
+$setup = $gateway->execute(new SetupMethod(new Customer('alice@example.org', 'Alice'), 'https://shop.example/account/saved', idempotencyKey: 'setup-42'))->getSetup();
+header('Location: '.$setup->redirectUrl);
+
+// 2. Listed as the provider has them now (an expired card says so: isExpired()).
+$methods = $gateway->execute(new FetchSavedMethods($setup->customer))->getMethods();
+
+// 3. Charged at once. PAID, REFUSED (the decline code in providerCode), or PENDING with the bank's
+//    page in redirectUrl when it asks its buyer (3-D Secure): notify() or fetch() says how it ended.
+$paid = $gateway->purchase(new Payment(
+    Money::of(1990, 'EUR'), 'ORDER-7',
+    customer: new Customer(reference: $setup->customer),
+    returnUrl: 'https://shop.example/orders/7',
+    idempotencyKey: 'order-7-attempt-1',
+    savedMethod: $methods[0]->reference,
+));
+
+// 4. Removed: only a method of that customer.
+$gateway->execute(new RemoveSavedMethod($setup->customer, $methods[0]->reference));
+```
+
+`supports(SetupMethod::class)` says whether a provider can; omnitrade/stripe 1.1 does (Checkout in
+setup mode, PaymentIntents off-session). Give the purchase an idempotency key per attempt and keep
+it: the same charge asked twice is made once.
+

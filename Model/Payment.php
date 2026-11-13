@@ -15,6 +15,9 @@ namespace Omnitrade\Model;
  * $destination and $applicationFee make it a payment for someone else: taken
  * by the platform, sent to a connected account (Request\CreateAccount), the
  * platform keeping its fee.
+ *
+ * $savedMethod charges a method the provider keeps for the buyer
+ * (Request\SetupMethod) without sending them to a page (off-session).
  */
 final readonly class Payment
 {
@@ -48,6 +51,15 @@ final readonly class Payment
         public ?string $destination = null,
         /** What the platform keeps of a payment sent to $destination; inside $amount. */
         public ?Money $applicationFee = null,
+        /**
+         * A method the provider keeps for the buyer (Request\SetupMethod: SavedMethod::$reference),
+         * charged at once with no page to go through - $customer->reference names the provider's
+         * customer it belongs to, where the provider has customers. The buyer's bank may still ask
+         * them to confirm (3-D Secure): the transaction is then PENDING with the provider's page
+         * as its redirectUrl ($returnUrl is where they come back), and notify() or fetch() says how
+         * it ended. Null: the provider's page, as before.
+         */
+        public ?string $savedMethod = null,
     ) {
         if (null !== $applicationFee && null === $destination) {
             throw new \InvalidArgumentException('An application fee is kept on a payment sent to a destination account.');

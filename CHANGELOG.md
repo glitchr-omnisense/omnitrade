@@ -2,6 +2,27 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-13
+
+Saved payment methods, charged without a page. Additive only: no signature changed, nothing
+removed; a provider that does not support the new requests refuses them as it refuses any other
+(`RequestNotSupportedException`, `supports()` false).
+
+### Added
+- `Request\SetupMethod` (a payment method saved on the provider's own page, for its customer -
+  made for the occasion when the buyer is none yet): result `Model\MethodSetup` (the page, the
+  provider's customer).
+- `Request\FetchSavedMethods` (the customer's methods as the provider has them now) and
+  `Request\RemoveSavedMethod` (only a method of that customer): `Model\SavedMethod` (reference,
+  customer, code, label, kind, brand, last four digits, expiry, `isExpired()`), never a number.
+- `Payment::$savedMethod`, a last optional constructor argument: the saved method charged at once
+  with no page (off-session); a bank that asks its buyer to confirm (3-D Secure) makes the
+  transaction PENDING with its page as `redirectUrl`.
+- `Gateway::OPERATIONS`: `setupMethod`, `fetchSavedMethods`, `removeSavedMethod` - requests
+  without a shortcut on `GatewayInterface` (as `registerWebhook`), run through `execute()` and
+  listed by `capabilities()`, so a site's usage policy can name them.
+- Tests: `SavedMethodsTest` (3).
+
 ## [1.0.0] - 2026-11-13
 
 The first stable release: it installs with Composer's default minimum-stability (stable).
