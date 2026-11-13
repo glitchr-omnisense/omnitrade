@@ -11,3 +11,11 @@ parameters:
     excludePaths:
         - vendor (?)
         - docker (?)
+    # The bundle names every provider's factory (OmnitradeBundle::FACTORIES) and registers those installed.
+    # Installed alone (this package's CI), they are unknown classes; with every provider (the family's
+    # harness), PHPStan knows them. Both hold.
+    ignoreErrors:
+        -
+            identifier: class.notFound
+            path: Bridge/Symfony/OmnitradeBundle.php
+            reportUnmatched: false

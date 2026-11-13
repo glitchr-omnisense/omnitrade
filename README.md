@@ -45,7 +45,7 @@ package of its own:
 | Package | Provider |
 |---|---|
 | `omnitrade/stripe` | Stripe: Checkout sessions, refunds, webhooks (on omnipay/stripe); its Products and Prices; Connect (Express accounts, destination charges); subscriptions |
-| `omnitrade/paypal` | PayPal: orders, capture, refunds, webhooks (on omnipay/paypal) |
+| `omnitrade/paypal` | PayPal: orders, capture, refunds, webhooks (Orders v2 REST, its own client) |
 | `omnitrade/shopify` | Shopify: draft orders paid on the invoice page, orders, the catalogue and inventory, webhooks (Admin GraphQL) |
 | `omnitrade/woocommerce` | WooCommerce: orders and their payment state, the catalogue and stock (REST API v3) |
 | `omnitrade/web` | Any product page, read from its own markup (JSON-LD, microdata, OpenGraph); affiliate links by host |
@@ -65,27 +65,39 @@ composer require omnisense/omnitrade omnitrade/paypal
 ```
 
 ```php
+<?php
+
 require __DIR__.'/vendor/autoload.php';
 
 use Omnitrade\Model\Money;
 use Omnitrade\Model\Payment;
 use Omnitrade\PayPal\PayPalGatewayFactory;
 use Omnitrade\Registry;
-use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Response\MockResponse;
 
-$registry = new Registry([new PayPalGatewayFactory(HttpClient::create())], [
-    'paypal' => ['factory' => 'paypal', 'options' => ['client_id' => '...', 'secret' => '...', 'sandbox' => true]],
+// PayPal's two answers (a token, then the order), recorded: no account, and nothing leaves the process.
+$paypal = new MockHttpClient([
+    new MockResponse('{"access_token": "not-a-token", "token_type": "Bearer", "expires_in": 32400}'),
+    new MockResponse('{"id": "5O190127TN364715T", "status": "PAYER_ACTION_REQUIRED", "links": [{"rel": "payer-action", "href": "https://www.sandbox.paypal.com/checkoutnow?token=5O190127TN364715T"}]}'),
+]);
+$registry = new Registry([new PayPalGatewayFactory($paypal)], [
+    'paypal' => ['factory' => 'paypal', 'options' => ['client_id' => 'id', 'secret' => 'secret', 'sandbox' => true]],
 ]);
 
-$transaction = $registry->get('paypal')->purchase(new Payment(amount: Money::of(1250, 'EUR'), reference: 'ORDER-1042', returnUrl: 'https://shop.example/retour'));
-$transaction->isRedirect() && header('Location: '.$transaction->redirectUrl);   // PayPal's page; capture() when the buyer is back
+$transaction = $registry->get('paypal')->purchase(new Payment(amount: Money::of(1250, 'EUR'), reference: 'ORDER-1042', returnUrl: 'https://shop.example/back'));
+echo $transaction->status->value, ' ', $transaction->redirectUrl, "\n";   // pending https://www.sandbox.paypal.com/checkoutnow?token=5O190127TN364715T
 ```
 
-A factory takes the HTTP client to call with - the application's, a `MockHttpClient` in a test -
-and makes its own when given none. A whole script that runs as it is, and the rest:
-[docs/installation.md](docs/installation.md). No class of a framework is loaded on the way:
-`Tests/BareTest.php` checks it in a process of its own, and so does
-`docker compose run --rm omnitrade bare` ([docs/harness.md](docs/harness.md)).
+No account for this first call: PayPal's answers are recorded (Symfony's `MockHttpClient` answers in
+place of the API), so nothing leaves the process. Every payment provider needs an account for a real
+call: a PayPal REST app (client id and secret) or a Stripe secret key, a Shopify store's Admin API
+token, a WooCommerce shop's REST key; test keys first, in each provider's sandbox. Only
+`omnitrade/web` and `omnitrade/amazon`'s affiliate links need none. A factory takes the HTTP client
+to call with - the application's, a `MockHttpClient` in a test - and makes its own when given none.
+A whole script that runs as it is, and the rest: [docs/installation.md](docs/installation.md). No
+class of a framework is loaded on the way: `Tests/BareTest.php` checks it in a process of its own,
+and so does `docker compose run --rm omnitrade bare` ([docs/harness.md](docs/harness.md)).
 
 ## Symfony
 

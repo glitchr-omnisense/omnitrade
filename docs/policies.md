@@ -79,8 +79,7 @@ asks for:
   its retries off (omnisense/contracts' `Http\NoRetry`): Symfony's `RetryableHttpClient`
   (`framework.http_client`'s `retry_failed`) would send a payment, a capture, a refund or an order
   again on a 429, 502 or 503, and with WooCommerce or Shopify that is a second order. A test
-  client (`MockHttpClient`) is kept as given. It needs omnisense/contracts 1568f2c or later; with
-  an older one the client is kept as given.
+  client (`MockHttpClient`) is kept as given.
 
 ```php
 try {

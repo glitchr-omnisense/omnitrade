@@ -346,7 +346,7 @@ name for a provider of one's own) requires `omnisense/omnitrade` and `symfony/ht
     "type": "library",
     "require": {
         "php": ">=8.2",
-        "omnisense/omnitrade": "^1.0@dev",
+        "omnisense/omnitrade": "^1.0",
         "symfony/http-client": "^6.4|^7.0|^8.0"
     },
     "require-dev": {
