@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-13
+
+### Changed
+- Neutral example data in docs and tests.
+
 ## [1.1.0] - 2026-11-13
 
 Saved payment methods, charged without a page. Additive only: no signature changed, nothing
