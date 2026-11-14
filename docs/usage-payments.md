@@ -203,7 +203,7 @@ and keep it with the attempt.
 | PayPal | `PayPal-Request-Id`: `<reference>-<key>` (purchase, authorize), `<order>-capture-<key>`, `<order>-authorize`, `<capture>-refund-<key>`; the purchase's `invoice_id` is `<reference>-<key>` too |
 | Shopify, WooCommerce | not sent |
 
-## Saved methods, charged without a page (1.1)
+## Saved methods, charged without a page (1.1, completed 1.2)
 
 A buyer who comes back often saves a method once, on the provider's page, and is charged later
 with no page at all. The site keeps the provider's references - its customer, the method - and
@@ -213,13 +213,21 @@ never a card number.
 use Omnitrade\Model\Customer;
 use Omnitrade\Model\Money;
 use Omnitrade\Model\Payment;
+use Omnitrade\Request\CompleteMethodSetup;
 use Omnitrade\Request\FetchSavedMethods;
 use Omnitrade\Request\RemoveSavedMethod;
 use Omnitrade\Request\SetupMethod;
 
-// 1. Saved on the provider's page; keep $setup->customer with the buyer's account.
-$setup = $gateway->execute(new SetupMethod(new Customer('alice@example.org', 'Alice'), 'https://shop.example/account/saved', idempotencyKey: 'setup-42'))->getSetup();
+// 1. Saved on the provider's page; keep $setup->customer with the buyer's account, and
+//    $setup->reference with something the return URL names (a token of yours in it).
+$setup = $gateway->execute(new SetupMethod(new Customer('alice@example.org', 'Alice'), 'https://shop.example/account/saved?setup=k3y', idempotencyKey: 'setup-42'))->getSetup();
 header('Location: '.$setup->redirectUrl);
+
+// 1b. Back on the return URL: completed where the gateway supports it (1.2) - the same code
+//     for every provider; PayPal needs it before the method is listed, Stripe answers it as saved.
+if ($gateway->supports(CompleteMethodSetup::class)) {
+    $saved = $gateway->execute(new CompleteMethodSetup($setup->reference, $setup->customer))->getMethod();
+}
 
 // 2. Listed as the provider has them now (an expired card says so: isExpired()).
 $methods = $gateway->execute(new FetchSavedMethods($setup->customer))->getMethods();
@@ -239,6 +247,16 @@ $gateway->execute(new RemoveSavedMethod($setup->customer, $methods[0]->reference
 ```
 
 `supports(SetupMethod::class)` says whether a provider can; omnitrade/stripe 1.1 does (Checkout in
-setup mode, PaymentIntents off-session). Give the purchase an idempotency key per attempt and keep
-it: the same charge asked twice is made once.
+setup mode, PaymentIntents off-session), omnitrade/paypal 1.2 too (Vault v3). Give the purchase an
+idempotency key per attempt and keep it: the same charge asked twice is made once.
+
+`CompleteMethodSetup` (1.2) answers the `SavedMethod` the setup saved. A provider that needs the
+step supports `SetupMethod` only along with it, so a host that asks it whenever it is supported
+works with every provider. It refuses with a `ProviderException` whose `providerCode` is
+`CompleteMethodSetup::NOT_THIS_CUSTOMER` a setup that is not the named customer's, and
+`CompleteMethodSetup::NOT_COMPLETED` one the buyer did not finish (cancelled, still open, expired):
+nothing is saved, the buyer starts again with a new `SetupMethod`. Asked twice, it answers the same
+method. The buyer who closes the page before the redirect never reaches the return URL: a host that
+keeps its pending setups can complete them later (when it lists the methods, say), since the
+completion is idempotent.
 

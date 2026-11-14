@@ -10,8 +10,11 @@ use Omnitrade\Model\MethodSetup;
  * signs in to their wallet) there, never here, and the provider keeps it for its customer -
  * $customer->reference when the buyer already is one, else a customer made from $customer's
  * e-mail and name. Result: the MethodSetup, its page to send the buyer to and the customer.
- * Once they are back on $returnUrl the method is listed by FetchSavedMethods and charged by a
- * Payment naming it ($savedMethod). Optional: a gateway that supports() it can, the others cannot.
+ * Once they are back on $returnUrl, ask CompleteMethodSetup with MethodSetup::$reference and
+ * $customer when the gateway supports() it (1.2: a provider that needs that step supports
+ * SetupMethod only along with it): it answers the saved method. Then the method is listed by
+ * FetchSavedMethods and charged by a Payment naming it ($savedMethod). Optional: a gateway that
+ * supports() it can, the others cannot.
  *
  * @extends Request<MethodSetup>
  */

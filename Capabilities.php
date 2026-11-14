@@ -9,8 +9,8 @@ use Omnisense\Contracts\Provider\CapabilitiesInterface;
  * What a gateway does, said before it is asked anything: the operations it
  * supports (GatewayInterface's method names - "purchase", "refund",
  * "fetchProducts"... - and "registerWebhook", "fetchWebhooks",
- * "deleteWebhook", "setupMethod", "fetchSavedMethods" and
- * "removeSavedMethod" for the requests without a shortcut) and its usage policy
+ * "deleteWebhook", "setupMethod", "completeMethodSetup", "fetchSavedMethods"
+ * and "removeSavedMethod" for the requests without a shortcut) and its usage policy
  * as the provider declares it (its policy.json).
  */
 final readonly class Capabilities implements CapabilitiesInterface

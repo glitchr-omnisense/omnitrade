@@ -2,6 +2,32 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-14
+
+A saved method's setup completed when the buyer comes back, the same request for every provider.
+Additive only: no signature changed, nothing removed; a provider that does not support the new
+request refuses it as it refuses any other (`RequestNotSupportedException`, `supports()` false).
+
+### Added
+- `Request\CompleteMethodSetup` (`MethodSetup::$reference`, `MethodSetup::$customer`): asked on
+  `SetupMethod`'s return URL, it completes the setup at the provider and answers the
+  `Model\SavedMethod` it saved. A provider that needs the step (PayPal turns the approved setup
+  token into a payment token) supports `SetupMethod` only along with it; one that does not need
+  it may answer it all the same (Stripe reads the Checkout session's method). A setup of another
+  customer is refused (`ProviderException`, code `CompleteMethodSetup::NOT_THIS_CUSTOMER`,
+  `not_this_customer` as `RemoveSavedMethod`'s providers give), one the buyer did not finish too
+  (code `CompleteMethodSetup::NOT_COMPLETED`, `setup_not_completed`); asked twice, the same method.
+- `Gateway::OPERATIONS`: `completeMethodSetup`, listed by `capabilities()` and counted by a
+  site's usage policy (`Registry::guarded()`), like the other requests without a shortcut.
+- `Testing\GatewayContractTests`: `SetupMethod`, `CompleteMethodSetup`, `FetchSavedMethods` and
+  `RemoveSavedMethod` among the calls refused before any HTTP request when unsupported and failed
+  as `ProviderException`s when the provider fails; `testASavedMethodSetupIsCompletedIntoTheMethodItSaved`
+  (on the recorded answers: the setup for `setupCustomer()`, then its completion - the setup's
+  customer's method, the same one asked twice; `CompleteMethodSetup` only with `SetupMethod`).
+  New hooks `setupCustomer()` and `setupReference()`. A provider that supports `SetupMethod`
+  records the setup's answers.
+- Tests: `SavedMethodsTest` (6: completion, its refusals, the guard counting it).
+
 ## [1.1.1] - 2026-11-13
 
 ### Changed

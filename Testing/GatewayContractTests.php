@@ -11,10 +11,12 @@ use Omnitrade\GatewayFactoryInterface;
 use Omnitrade\GatewayInterface;
 use Omnitrade\Model\Customer;
 use Omnitrade\Model\Line;
+use Omnitrade\Model\MethodSetup;
 use Omnitrade\Model\Money;
 use Omnitrade\Model\Payment;
 use Omnitrade\Model\PaymentMethod;
 use Omnitrade\Model\Product;
+use Omnitrade\Model\SavedMethod;
 use Omnitrade\Model\Status;
 use Omnitrade\Model\Transaction;
 use Omnitrade\Registry;
@@ -51,7 +53,11 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  *   non-empty references, money in minor units in an ISO currency, a void CANCELLED, a refund of
  *   5,00 EUR recorded as 500);
  * - notify(): a signed webhook is read as one event, a tampered or unsigned one is an
- *   InvalidNotificationException.
+ *   InvalidNotificationException;
+ * - saved methods (1.1, 1.2): SetupMethod, CompleteMethodSetup, FetchSavedMethods and
+ *   RemoveSavedMethod refused or failed as above; CompleteMethodSetup only along with SetupMethod;
+ *   on the recorded answers, a setup for setupCustomer() names its provider and its page, and
+ *   completing it answers the method it saved, the setup's customer's, the same one asked twice.
  *
  * No test reaches the network: every request goes to the suite's MockHttpClient, and one with no
  * recorded answer is answered HTTP 404 and named in the failure.
@@ -143,6 +149,24 @@ trait GatewayContractTests
     protected function catalogueQuery(): ?string
     {
         return null;
+    }
+
+    /**
+     * The buyer a payment method is saved for (SetupMethod, 1.1), and whose setup is completed
+     * (CompleteMethodSetup, 1.2): by default one the provider already knows ($reference).
+     */
+    protected function setupCustomer(): Customer
+    {
+        return new Customer(email: 'camille@example.org', name: 'Camille Durand', reference: 'cus_contract');
+    }
+
+    /**
+     * The setup CompleteMethodSetup completes when it is not the one SetupMethod just answered
+     * (the failure cases): a MethodSetup::$reference the recorded answers know.
+     */
+    protected function setupReference(): string
+    {
+        return 'setup_contract';
     }
 
     /**
@@ -439,6 +463,43 @@ trait GatewayContractTests
         }
     }
 
+    public function testASavedMethodSetupIsCompletedIntoTheMethodItSaved(): void
+    {
+        $gateway = $this->contractGateway();
+        $completes = $gateway->supports(Request\CompleteMethodSetup::class);
+        if (!$gateway->supports(Request\SetupMethod::class)) {
+            self::assertFalse($completes, 'a setup completed is a setup made: CompleteMethodSetup comes with SetupMethod');
+
+            return;
+        }
+        $customer = $this->setupCustomer();
+        $setup = $this->answered(fn () => $gateway->execute(new Request\SetupMethod($customer, 'https://shop.example/account/saved', idempotencyKey: 'setup-1'))->getSetup(), 'setupMethod');
+        self::assertInstanceOf(MethodSetup::class, $setup, 'setupMethod(): a MethodSetup');
+        self::assertSame($gateway->getName(), $setup->provider, 'setupMethod(): the setup names its provider');
+        self::assertNotSame('', $setup->reference, 'setupMethod(): the provider\'s id for the setup');
+        self::assertMatchesRegularExpression('#^https?://#', $setup->redirectUrl, 'setupMethod(): the page the buyer is sent to');
+        if (null !== $customer->reference && null !== $setup->customer) {
+            self::assertSame($customer->reference, $setup->customer, 'setupMethod(): for the customer it was asked for');
+        }
+        if (!$completes) {
+            return;
+        }
+
+        $request = new Request\CompleteMethodSetup($setup->reference, $setup->customer);
+        $method = $this->answered(fn () => $gateway->execute($request)->getMethod(), 'completeMethodSetup');
+        self::assertInstanceOf(SavedMethod::class, $method, 'completeMethodSetup(): the method the setup saved');
+        self::assertNotSame('', $method->reference, 'completeMethodSetup(): the provider\'s id for the method');
+        self::assertNotSame('', $method->code);
+        self::assertNotSame('', $method->label);
+        self::assertContains($method->kind, [PaymentMethod::CARD, PaymentMethod::WALLET, PaymentMethod::BANK, PaymentMethod::BUY_NOW_PAY_LATER, PaymentMethod::OTHER]);
+        if (null !== $setup->customer && null !== $method->customer) {
+            self::assertSame($setup->customer, $method->customer, 'completeMethodSetup(): the setup\'s customer\'s method');
+        }
+        self::assertSame('completeMethodSetup', \Omnitrade\Gateway::operation($request));
+        $again = $this->answered(fn () => $gateway->execute(new Request\CompleteMethodSetup($setup->reference, $setup->customer))->getMethod(), 'completeMethodSetup');
+        self::assertSame($method->reference, $again?->reference, 'completeMethodSetup(): asked twice, the same method');
+    }
+
     /** @return array<class-string<Request\Request>, \Closure(GatewayInterface): mixed> every typed method, asked with plausible arguments */
     private function contractCalls(): array
     {
@@ -446,6 +507,8 @@ trait GatewayContractTests
         $reference = $this->transactionReference();
         $product = $this->productReference();
         $query = $this->catalogueQuery();
+        $setupCustomer = $this->setupCustomer();
+        $setup = $this->setupReference();
 
         return [
             Request\Purchase::class => static fn (GatewayInterface $g) => $g->purchase($payment),
@@ -468,6 +531,10 @@ trait GatewayContractTests
             Request\FetchSubscription::class => static fn (GatewayInterface $g) => $g->fetchSubscription('sub_contract'),
             Request\CancelSubscription::class => static fn (GatewayInterface $g) => $g->cancelSubscription('sub_contract'),
             Request\SubscriptionPortal::class => static fn (GatewayInterface $g) => $g->subscriptionPortal('cus_contract', 'https://shop.example/account'),
+            Request\SetupMethod::class => static fn (GatewayInterface $g) => $g->execute(new Request\SetupMethod($setupCustomer, 'https://shop.example/account/saved', idempotencyKey: 'setup-1'))->getSetup(),
+            Request\CompleteMethodSetup::class => static fn (GatewayInterface $g) => $g->execute(new Request\CompleteMethodSetup($setup, $setupCustomer->reference))->getMethod(),
+            Request\FetchSavedMethods::class => static fn (GatewayInterface $g) => $g->execute(new Request\FetchSavedMethods($setupCustomer->reference ?? 'cus_contract'))->getMethods(),
+            Request\RemoveSavedMethod::class => static fn (GatewayInterface $g) => $g->execute(new Request\RemoveSavedMethod($setupCustomer->reference ?? 'cus_contract', 'pm_contract'))->isRemoved(),
         ];
     }
 

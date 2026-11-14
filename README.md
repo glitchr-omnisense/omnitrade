@@ -29,6 +29,9 @@ The catalogue (`Product`, `ProductVariant`, `Offer`, `Stock`, `Media`, `Option`,
 and the affiliate links are described in [docs/catalogue.md](docs/catalogue.md), connected
 accounts and payments for someone else (`Payment::$destination`, `::$applicationFee`) in
 [docs/connect.md](docs/connect.md), subscriptions in [docs/subscriptions.md](docs/subscriptions.md).
+Saved payment methods - saved on the provider's page (`SetupMethod`), completed when the buyer is
+back (`CompleteMethodSetup`, 1.2), listed, removed and charged with no page - are in
+[docs/usage-payments.md](docs/usage-payments.md#saved-methods-charged-without-a-page-11-completed-12).
 
 This package holds the contract (`GatewayInterface`, `GatewayFactory`, `Registry`), the models
 (`Payment`, `Money`, `Transaction`, `Refund`, `PaymentMethod`, `Notification`, `PlatformOrder`,
@@ -44,8 +47,8 @@ package of its own:
 
 | Package | Provider |
 |---|---|
-| `omnitrade/stripe` | Stripe: Checkout sessions, refunds, webhooks (on omnipay/stripe); its Products and Prices; Connect (Express accounts, destination charges); subscriptions |
-| `omnitrade/paypal` | PayPal: orders, capture, refunds, webhooks (Orders v2 REST, its own client) |
+| `omnitrade/stripe` | Stripe: Checkout sessions, refunds, webhooks (on omnipay/stripe); its Products and Prices; Connect (Express accounts, destination charges); subscriptions; saved cards charged off-session |
+| `omnitrade/paypal` | PayPal: orders, capture, refunds, webhooks (Orders v2 REST, its own client); saved PayPal accounts (Vault v3) |
 | `omnitrade/shopify` | Shopify: draft orders paid on the invoice page, orders, the catalogue and inventory, webhooks (Admin GraphQL) |
 | `omnitrade/woocommerce` | WooCommerce: orders and their payment state, the catalogue and stock (REST API v3) |
 | `omnitrade/web` | Any product page, read from its own markup (JSON-LD, microdata, OpenGraph); affiliate links by host |

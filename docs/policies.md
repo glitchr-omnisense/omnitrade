@@ -38,7 +38,7 @@ $registry->get('card')->capabilities()->contracts();   // the operations it supp
 A site may only tighten a policy. A looser limit is an `InvalidPolicyException` from
 omnisense/contracts. An operation is `GatewayInterface`'s method name (`purchase`, `refund`,
 `fetchProducts`...), plus `registerWebhook`, `fetchWebhooks`, `deleteWebhook`, `setupMethod`,
-`fetchSavedMethods` and `removeSavedMethod` (`Gateway::OPERATIONS`).
+`completeMethodSetup` (1.2), `fetchSavedMethods` and `removeSavedMethod` (`Gateway::OPERATIONS`).
 
 ## The guard
 

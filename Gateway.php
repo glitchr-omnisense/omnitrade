@@ -61,6 +61,7 @@ final class Gateway implements GatewayInterface, DeclaresUsagePolicyInterface
         Request\SetupMethod::class => 'setupMethod',
         Request\FetchSavedMethods::class => 'fetchSavedMethods',
         Request\RemoveSavedMethod::class => 'removeSavedMethod',
+        Request\CompleteMethodSetup::class => 'completeMethodSetup',
     ];
 
     private ?Capabilities $capabilities = null;
